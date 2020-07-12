@@ -54,7 +54,7 @@ Make sure that gradle is set to use gradle-wrapper.properties.
 * Create [GitHub issues](https://github.com/charvakcpatel007/spring-pulsar/issues) for bugs and new features and comment and vote on the ones that you are interested in.
 * If you want to write code, we encourage contributions through pull requests from [forks of this repository](https://help.github.com/forking/).  If you want to contribute code this way, please reference a GitHub issue as well covering the specific issue you are addressing.
 
-#Help Wanted
+# Help Wanted
 * Gradle :
 I am not well versed with whole gradle. You are welcome if you can help with gradle cleanup as current file is just spaghetti of copypastas that works.
 Feel free to raise issues and PRs if you know what you are doing.
