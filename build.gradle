@@ -1,0 +1,469 @@
+buildscript {
+	ext.kotlinVersion = '1.3.61'
+	repositories {
+		maven { url 'https://repo.spring.io/plugins-release' }
+	}
+	dependencies {
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+		classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlinVersion"
+	}
+}
+
+plugins {
+	id 'base'
+	id 'project-report'
+	id 'idea'
+	id 'org.sonarqube' version '2.8'
+	id 'org.ajoberstar.grgit' version '4.0.1' apply false
+	id 'io.spring.nohttp' version '0.0.4.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
+	id 'com.jfrog.artifactory' version '4.13.0' apply false
+	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
+	id 'org.asciidoctor.jvm.gems' version '3.1.0'
+	id 'org.asciidoctor.jvm.convert' version '3.1.0'
+}
+
+apply plugin: 'io.spring.nohttp'
+
+def gitPresent = new File('.git').exists()
+
+if(gitPresent) {
+	apply plugin: 'org.ajoberstar.grgit'
+}
+
+description = 'Spring Pulsar'
+
+ext {
+	linkHomepage = 'https://github.com/charvakcpatel007/spring-pulsar'
+	linkIssue = 'https://github.com/charvakcpatel007/spring-pulsar/issues'
+	linkScmUrl = 'https://github.com/charvakcpatel007/spring-pulsar'
+	linkScmConnection = 'https://github.com/charvakcpatel007/spring-pulsar.git'
+	linkScmDevConnection = 'git@github.com:charvakcpatel007/spring-pulsar.git'
+	docResourcesVersion = '0.2.1.RELEASE'
+
+
+	if (gitPresent) {
+		modifiedFiles =
+			files(grgit.status().unstaged.modified).filter{ f -> f.name.endsWith('.java') || f.name.endsWith('.kt') }
+	}
+
+	assertjVersion = '3.16.1'
+	googleJsr305Version = '3.0.2'
+	hamcrestVersion = '2.2'
+	hibernateValidationVersion = '6.1.5.Final'
+	jacksonVersion = '2.11.0'
+	jaywayJsonPathVersion = '2.4.0'
+	junit4Version = '4.13'
+	junitJupiterVersion = '5.6.2'
+	kafkaVersion = '2.5.0'
+	log4jVersion = '2.13.2'
+	micrometerVersion = '1.5.1'
+	mockitoVersion = '3.3.3'
+	reactorVersion = 'Dysprosium-SR8'
+	scalaVersion = '2.12'
+	springDataCommonsVersion = '2.3.0.RELEASE'
+	springRetryVersion = '1.2.5.RELEASE'
+	springVersion = '5.2.7.RELEASE'
+	idPrefix = 'kafka'
+}
+
+nohttp {
+	source.include '**/src/**'
+	source.exclude '**/*.gif', '**/*.ks'
+}
+
+allprojects {
+	group = 'org.icholo.springpulsar'
+
+	apply plugin: 'io.spring.dependency-management'
+
+	dependencyManagement {
+		resolutionStrategy {
+			cacheChangingModulesFor 0, 'seconds'
+		}
+		applyMavenExclusions = false
+		generatedPomCustomization {
+			enabled = false
+		}
+
+		imports {
+			mavenBom "com.fasterxml.jackson:jackson-bom:$jacksonVersion"
+			mavenBom "org.junit:junit-bom:$junitJupiterVersion"
+			mavenBom "org.springframework:spring-framework-bom:$springVersion"
+			mavenBom "io.projectreactor:reactor-bom:$reactorVersion"
+		}
+	}
+
+	repositories {
+		mavenLocal()
+		maven { url 'https://repo.spring.io/libs-milestone' }
+		if (version.endsWith('BUILD-SNAPSHOT')) {
+			maven { url 'https://repo.spring.io/libs-snapshot' }
+		}
+//		maven { url 'https://repository.apache.org/content/groups/staging/' }
+	}
+
+}
+
+subprojects { subproject ->
+	apply plugin: 'java-library'
+	apply plugin: 'java'
+	apply from: "${rootProject.projectDir}/publish-maven.gradle"
+	apply plugin: 'eclipse'
+	apply plugin: 'idea'
+	apply plugin: 'jacoco'
+	apply plugin: 'kotlin'
+	apply plugin: 'kotlin-spring'
+
+	java {
+		withJavadocJar()
+		withSourcesJar()
+		registerFeature('optional') {
+			usingSourceSet(sourceSets.main)
+		}
+		registerFeature('provided') {
+			usingSourceSet(sourceSets.main)
+		}
+	}
+
+	compileJava {
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
+	}
+
+	compileTestKotlin {
+		kotlinOptions {
+			jvmTarget = '1.8'
+		}
+	}
+
+	eclipse.project.natures += 'org.springframework.ide.eclipse.core.springnature'
+
+	jacoco {
+		toolVersion = '0.8.5'
+	}
+
+	// dependencies that are common across all java projects
+	dependencies {
+		compileOnly "com.google.code.findbugs:jsr305:$googleJsr305Version"
+		testImplementation 'org.junit.jupiter:junit-jupiter-api'
+		testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+		// To avoid compiler warnings about @API annotations in JUnit code
+		testCompileOnly 'org.apiguardian:apiguardian-api:1.0.0'
+
+		testRuntimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion"
+
+		testImplementation 'org.jetbrains.kotlin:kotlin-reflect'
+		testImplementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+		optionalApi "org.assertj:assertj-core:$assertjVersion"
+	}
+
+	// enable all compiler warnings; individual projects may customize further
+	[compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:all,-options']
+
+	test {
+		// suppress all console output during testing unless running `gradle -i`
+		logging.captureStandardOutput(LogLevel.INFO)
+		maxHeapSize = '1536m'
+		jacoco {
+			destinationFile = file("$buildDir/jacoco.exec")
+		}
+		useJUnitPlatform()
+	}
+
+	jacocoTestReport {
+		reports {
+			xml.enabled false
+			csv.enabled false
+			html.destination file("${buildDir}/reports/jacoco/html")
+		}
+	}
+
+	build.dependsOn jacocoTestReport
+
+	publishing {
+		publications {
+			mavenJava(MavenPublication) {
+				suppressAllPomMetadataWarnings()
+				from components.java
+				pom.withXml {
+					def pomDeps = asNode().dependencies.first()
+					subproject.configurations.providedImplementation.allDependencies.each { dep ->
+						pomDeps.remove(pomDeps.'*'.find { it.artifactId.text() == dep.name })
+						pomDeps.appendNode('dependency').with {
+							it.appendNode('groupId', dep.group)
+							it.appendNode('artifactId', dep.name)
+							it.appendNode('version', dep.version)
+							it.appendNode('scope', 'provided')
+						}
+					}
+				}
+			}
+		}
+	}
+
+	jar {
+		manifest {
+			attributes(
+					'Implementation-Version': archiveVersion,
+					'Created-By': "JDK ${System.properties['java.version']} (${System.properties['java.specification.vendor']})",
+					'Implementation-Title': subproject.name,
+					'Implementation-Vendor-Id': subproject.group,
+					'Implementation-Vendor': 'Icholo',
+					'Implementation-URL': linkHomepage,
+					'Automatic-Module-Name': subproject.name.replace('-', '.')
+			)
+		}
+
+		from("${rootProject.projectDir}/src/dist") {
+			include 'license.txt'
+			include 'notice.txt'
+			into 'META-INF'
+			expand(copyright: new Date().format('yyyy'), version: project.version)
+		}
+	}
+
+}
+
+project ('spring-pulsar') {
+	description = 'Spring Pulsar'
+
+	dependencies {
+		api 'org.springframework:spring-context'
+		api 'org.springframework:spring-messaging'
+		api 'org.springframework:spring-tx'
+		api ("org.springframework.retry:spring-retry:$springRetryVersion") {
+			exclude group: 'org.springframework'
+		}
+		api "org.apache.kafka:kafka-clients:$kafkaVersion"
+		optionalApi "org.apache.kafka:kafka-streams:$kafkaVersion"
+
+		optionalApi 'com.fasterxml.jackson.core:jackson-core'
+		optionalApi 'com.fasterxml.jackson.core:jackson-databind'
+
+		// Spring Data projection message binding support
+		optionalApi ("org.springframework.data:spring-data-commons:$springDataCommonsVersion") {
+			exclude group: 'org.springframework'
+		}
+		optionalApi "com.jayway.jsonpath:json-path:$jaywayJsonPathVersion"
+
+		optionalApi 'io.projectreactor:reactor-core'
+		optionalApi 'io.projectreactor.kafka:reactor-kafka'
+		optionalApi "io.micrometer:micrometer-core:$micrometerVersion"
+
+		testImplementation project (':spring-pulsar-test')
+		testImplementation 'io.projectreactor:reactor-test'
+		testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+		testImplementation "org.hibernate.validator:hibernate-validator:$hibernateValidationVersion"
+	}
+}
+
+project ('spring-pulsar-test') {
+	description = 'Spring Pulsar Test'
+
+	dependencies {
+		api 'org.springframework:spring-context'
+		api 'org.springframework:spring-test'
+		api ("org.springframework.retry:spring-retry:$springRetryVersion") {
+			exclude group: 'org.springframework'
+		}
+
+		api "org.apache.kafka:kafka-clients:$kafkaVersion:test"
+		api "org.apache.kafka:kafka-streams:$kafkaVersion"
+		api "org.apache.kafka:kafka-streams-test-utils:$kafkaVersion"
+		api "org.apache.kafka:kafka_$scalaVersion:$kafkaVersion"
+		api "org.apache.kafka:kafka_$scalaVersion:$kafkaVersion:test"
+		api 'org.junit.jupiter:junit-jupiter-api'
+		optionalApi "org.hamcrest:hamcrest-core:$hamcrestVersion"
+		optionalApi "org.mockito:mockito-core:$mockitoVersion"
+		optionalApi ("junit:junit:$junit4Version") {
+			exclude group: 'org.hamcrest', module: 'hamcrest-core'
+		}
+		optionalApi "org.apache.logging.log4j:log4j-core:$log4jVersion"
+	}
+}
+
+configurations {
+	docs
+}
+
+dependencies {
+	docs "io.spring.docresources:spring-doc-resources:${docResourcesVersion}@zip"
+}
+
+task prepareAsciidocBuild(type: Sync) {
+	dependsOn configurations.docs
+	from {
+		configurations.docs.collect { zipTree(it) }
+	}
+	from 'src/reference/asciidoc/'
+	into "$buildDir/asciidoc"
+}
+
+asciidoctorPdf {
+	dependsOn prepareAsciidocBuild
+	baseDirFollowsSourceFile()
+
+	asciidoctorj {
+		sourceDir "$buildDir/asciidoc"
+		inputs.dir(sourceDir)
+		sources {
+			include 'index.adoc'
+		}
+		options doctype: 'book'
+		attributes 'icons': 'font',
+		'sectanchors': '',
+		'sectnums': '',
+		'toc': '',
+		'source-highlighter' : 'coderay',
+		revnumber: project.version,
+		'project-version': project.version
+	}
+}
+
+asciidoctor {
+	dependsOn asciidoctorPdf
+	baseDirFollowsSourceFile()
+	sourceDir = file("$buildDir/asciidoc")
+	sources {
+		include '*.adoc'
+	}
+	resources {
+		from(sourceDir) {
+			include 'images/*', 'css/**', 'js/**'
+		}
+	}
+	options doctype: 'book', eruby: 'erubis'
+
+	attributes 'docinfo': 'shared',
+		stylesdir: "css/",
+		stylesheet: 'spring.css',
+		'linkcss': true,
+		'icons': 'font',
+		'sectanchors': '',
+		'source-highlighter': 'highlight.js',
+		'highlightjsdir': 'js/highlight',
+		'highlightjs-theme': 'github',
+		'idprefix': '',
+		'idseparator': '-',
+		'spring-version': project.version,
+		'allow-uri-read': '',
+		'toc': 'left',
+		'toclevbels': '4',
+		revnumber: project.version,
+		'project-version': project.version
+}
+
+task reference(dependsOn: asciidoctor) {
+	group = 'Documentation'
+	description = 'Generate the reference documentation'
+}
+
+reference.onlyIf { "$System.env.NO_REFERENCE_TASK" != 'true' || project.hasProperty('ignoreEnvToStopReference') }
+
+sonarqube {
+	properties {
+		property 'sonar.jacoco.reportPath', "${buildDir.name}/jacoco.exec"
+		property 'sonar.links.homepage', linkHomepage
+		property 'sonar.links.ci', linkCi
+		property 'sonar.links.issue', linkIssue
+		property 'sonar.links.scm', linkScmUrl
+		property 'sonar.links.scm_dev', linkScmDevConnection
+		property 'sonar.java.coveragePlugin', 'jacoco'
+	}
+}
+
+task api(type: Javadoc) {
+	group = 'Documentation'
+	description = 'Generates aggregated Javadoc API documentation.'
+	title = "${rootProject.description} ${version} API"
+	options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+	options.author = true
+	options.header = rootProject.description
+	options.overview = 'src/api/overview.html'
+
+	source subprojects.collect { project ->
+		project.sourceSets.main.allJava
+	}
+
+	classpath = files(subprojects.collect { project ->
+		project.sourceSets.main.compileClasspath
+	})
+	destinationDir = new File(buildDir, 'api')
+}
+
+task docsZip(type: Zip, dependsOn: [reference]) {
+	group = 'Distribution'
+	archiveClassifier = 'docs'
+	description = "Builds -${archiveClassifier} archive containing api and reference " +
+			"for deployment at static.spring.io/spring-kafka/docs."
+
+	from('src/dist') {
+		include 'changelog.txt'
+	}
+
+	from(api) {
+		into 'api'
+	}
+
+	from ('build/docs/asciidoc') {
+		into 'reference/html'
+	}
+
+	from ('build/docs/asciidocPdf') {
+		include 'index.pdf'
+		rename 'index.pdf', 'spring-kafka-reference.pdf'
+		into 'reference/pdf'
+	}
+}
+
+task distZip(type: Zip, dependsOn: [docsZip]) { //, schemaZip]) {
+	group = 'Distribution'
+	archiveClassifier = 'dist'
+	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
+			"suitable for community download page."
+
+	ext.baseDir = "${project.name}-${project.version}"
+
+	from('src/dist') {
+		include 'readme.txt'
+		include 'license.txt'
+		include 'notice.txt'
+		into "${baseDir}"
+	}
+
+	from(zipTree(docsZip.archivePath)) {
+		into "${baseDir}/docs"
+	}
+
+	subprojects.each { subproject ->
+		into ("${baseDir}/libs") {
+			from subproject.jar
+			from subproject.sourcesJar
+			from subproject.javadocJar
+		}
+	}
+}
+
+artifacts {
+	archives distZip
+	archives docsZip
+}
+
+task dist(dependsOn: assemble) {
+	group = 'Distribution'
+	description = 'Builds -dist, -docs distribution archives.'
+}
+
+apply from: "${rootProject.projectDir}/publish-maven.gradle"
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			artifact docsZip
+			artifact distZip
+		}
+	}
+}

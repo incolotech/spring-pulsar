@@ -1,0 +1,58 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			pom {
+				afterEvaluate {
+					name = project.description
+					description = project.description
+				}
+				url = linkScmUrl
+				licenses {
+					license {
+						name = 'GNU GENERAL PUBLIC LICENSE, Version 3'
+						url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+						distribution = 'repo'
+					}
+				}
+				scm {
+					url = linkScmUrl
+					connection = linkScmConnection
+					developerConnection = linkScmDevConnection
+				}
+				developers {
+					developer {
+						id = 'charvakcpatel007'
+						name = 'Charvak Patel'
+						email = 'charvakcpatel007@gmail.com'
+						roles = ["project lead"]
+					}
+					developer {
+						id = 'girishramnani'
+						name = 'Girish Ramnani'
+						email = 'girishramnani95@gmail.com'
+						roles = ["project lead"]
+					}
+				}
+				issueManagement {
+					system = 'GitHub'
+					url = linkIssue
+				}
+			}
+			versionMapping {
+				usage('java-api') {
+					fromResolutionResult()
+				}
+				usage('java-runtime') {
+					fromResolutionResult()
+				}
+			}
+		}
+	}
+}
+
+artifactoryPublish {
+	publications(publishing.publications.mavenJava)
+}
