@@ -1,0 +1,4 @@
+rootProject.name = 'spring-pulsar'
+
+include 'spring-pulsar'
+include 'spring-pulsar-test'
