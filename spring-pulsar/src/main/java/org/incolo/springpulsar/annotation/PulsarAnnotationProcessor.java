@@ -1,6 +1,8 @@
 package org.incolo.springpulsar.annotation;
 
 
+import org.springframework.core.annotation.AnnotatedElementUtils;
+
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +10,8 @@ import java.util.Optional;
 public class PulsarAnnotationProcessor {
 
 	Optional<PulsarListener> findClassLevelAnnotation(final Class<?> clz) {
-		throw new UnsupportedOperationException();
+		return Optional.ofNullable(clz)
+				.map(c -> AnnotatedElementUtils.findMergedAnnotation(clz, PulsarListener.class));
 	}
 
 	Map<Method, PulsarListener> findMethodLevelAnnotations(final Class<?> clz) {
