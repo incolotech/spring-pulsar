@@ -8,7 +8,7 @@ publish to your local maven Repository by running
 Then you refer it by included mavenLocal() in your repositories
 Then use this dependency
 
-    implementation 'org.icholo.springpulsar:spring-pulsar:0.0.1'
+    implementation 'org.incolo.springpulsar:spring-pulsar:0.0.1'
 
 Then you can refer to it in your
 

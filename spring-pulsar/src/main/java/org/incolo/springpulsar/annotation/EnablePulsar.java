@@ -1,4 +1,4 @@
-package org.icholo.springpulsar.annotation;
+package org.incolo.springpulsar.annotation;
 
 
 import org.springframework.context.annotation.Import;

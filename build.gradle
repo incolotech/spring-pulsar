@@ -73,7 +73,7 @@ nohttp {
 }
 
 allprojects {
-	group = 'org.icholo.springpulsar'
+	group = 'org.incolo.springpulsar'
 
 	apply plugin: 'io.spring.dependency-management'
 
@@ -211,7 +211,7 @@ subprojects { subproject ->
 					'Created-By': "JDK ${System.properties['java.version']} (${System.properties['java.specification.vendor']})",
 					'Implementation-Title': subproject.name,
 					'Implementation-Vendor-Id': subproject.group,
-					'Implementation-Vendor': 'Icholo',
+					'Implementation-Vendor': 'incolo',
 					'Implementation-URL': linkHomepage,
 					'Automatic-Module-Name': subproject.name.replace('-', '.')
 			)
