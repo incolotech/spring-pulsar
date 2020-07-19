@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.icholo.springpulsar.annotation;
+package org.incolo.springpulsar.annotation;
 
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;

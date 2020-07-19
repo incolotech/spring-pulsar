@@ -1,4 +1,4 @@
-package org.icholo.springpulsar.annotation;
+package org.incolo.springpulsar.annotation;
 
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -17,7 +17,7 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 
 	protected final LogAccessor logger = new LogAccessor(LogFactory.getLog(getClass()));
 
-	public static final String PULSAR_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME = "org.icholo.springpulsar.annotation.DefaultPulsarListenerAnnotationBeanPostProcessor";
+	public static final String PULSAR_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME = "org.incolo.springpulsar.annotation.DefaultPulsarListenerAnnotationBeanPostProcessor";
 
 	private BeanFactory beanFactory;
 

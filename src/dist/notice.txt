@@ -1,5 +1,5 @@
 Spring for Apache Pulsar Framework ${version}
-Copyright (c) 2020-${copyright} Icholo
+Copyright (c) 2020-${copyright} incolo
 
 This product is licensed to you under theGNU GENERAL PUBLIC LICENSE, Version 3
 (the "License"). You may not use this product except in compliance with
