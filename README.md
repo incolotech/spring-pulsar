@@ -16,8 +16,8 @@ Then you can refer to it in your
 
 To check out the project and build from source, do the following:
 
-    git clone git://github.com/spring-projects/spring-kafka.git
-    cd spring-kafka
+    git clone git://github.com/spring-projects/spring-pulsar.git
+    cd spring-pulsar
     ./gradlew build
 
 The Java SE 7 or higher is recommended to build the project.
