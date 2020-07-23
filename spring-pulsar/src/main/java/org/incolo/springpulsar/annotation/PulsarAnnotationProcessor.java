@@ -1,6 +1,7 @@
 package org.incolo.springpulsar.annotation;
 
 
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import java.lang.reflect.Method;
@@ -9,24 +10,34 @@ import java.util.Optional;
 
 public class PulsarAnnotationProcessor {
 
-	Optional<PulsarListener> findClassLevelAnnotation(final Class<?> clz) {
+	public Optional<PulsarListener> findClassLevelAnnotation(final Class<?> clz) {
 		return Optional.ofNullable(clz)
 				.map(c -> AnnotatedElementUtils.findMergedAnnotation(clz, PulsarListener.class));
 	}
 
-	Map<Method, PulsarListener> findMethodLevelAnnotations(final Class<?> clz) {
-		throw new UnsupportedOperationException();
+	public Map<Method, PulsarListener> findMethodLevelAnnotations(final Class<?> clz) {
+		final MethodIntrospector.MetadataLookup<PulsarListener> selectorFunc =
+				method -> findMethodLevelAnnotation(method).orElse(null); //Returning null will not include entry regarding that method in the return map
+		return Optional.ofNullable(clz)
+				.map(c -> MethodIntrospector.selectMethods(c, selectorFunc))
+				.orElse(null);
 	}
 
-	Optional<PulsarListener> findMethodLevelAnnotation(final Method method) {
-		throw new UnsupportedOperationException();
+	public Optional<PulsarListener> findMethodLevelAnnotation(final Method method) {
+		return Optional.ofNullable(method)
+				.map(m -> AnnotatedElementUtils.findMergedAnnotation(m, PulsarListener.class));
 	}
 
-	Map<Method, PulsarHandler> findMethodLevelHandlerAnnotations(final Class<?> clz) {
-		throw new UnsupportedOperationException();
+	public Map<Method, PulsarHandler> findMethodLevelHandlerAnnotations(final Class<?> clz) {
+		final MethodIntrospector.MetadataLookup<PulsarHandler> selectorFunc =
+				method -> findMethodLevelHandlerAnnotation(method).orElse(null); //Returning null will not include entry regarding that method in the return map
+		return Optional.ofNullable(clz)
+				.map(c -> MethodIntrospector.selectMethods(c, selectorFunc))
+				.orElse(null);
 	}
 
-	Optional<PulsarHandler> findMethodLevelHandlerAnnotation(final Method method) {
-		throw new UnsupportedOperationException();
+	public Optional<PulsarHandler> findMethodLevelHandlerAnnotation(final Method method) {
+		return Optional.ofNullable(method)
+				.map(m -> AnnotatedElementUtils.findMergedAnnotation(m, PulsarHandler.class));
 	}
 }

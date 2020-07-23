@@ -55,7 +55,6 @@ ext {
 	jaywayJsonPathVersion = '2.4.0'
 	junit4Version = '4.13'
 	junitJupiterVersion = '5.6.2'
-	kafkaVersion = '2.5.0'
 	log4jVersion = '2.13.2'
 	micrometerVersion = '1.5.1'
 	mockitoVersion = '3.3.3'
@@ -64,7 +63,7 @@ ext {
 	springDataCommonsVersion = '2.3.0.RELEASE'
 	springRetryVersion = '1.2.5.RELEASE'
 	springVersion = '5.2.7.RELEASE'
-	idPrefix = 'kafka'
+	idPrefix = 'pulsar'
 }
 
 nohttp {
@@ -237,8 +236,6 @@ project ('spring-pulsar') {
 		api ("org.springframework.retry:spring-retry:$springRetryVersion") {
 			exclude group: 'org.springframework'
 		}
-		api "org.apache.kafka:kafka-clients:$kafkaVersion"
-		optionalApi "org.apache.kafka:kafka-streams:$kafkaVersion"
 
 		optionalApi 'com.fasterxml.jackson.core:jackson-core'
 		optionalApi 'com.fasterxml.jackson.core:jackson-databind'
@@ -250,7 +247,6 @@ project ('spring-pulsar') {
 		optionalApi "com.jayway.jsonpath:json-path:$jaywayJsonPathVersion"
 
 		optionalApi 'io.projectreactor:reactor-core'
-		optionalApi 'io.projectreactor.kafka:reactor-kafka'
 		optionalApi "io.micrometer:micrometer-core:$micrometerVersion"
 
 		testImplementation project (':spring-pulsar-test')
@@ -269,12 +265,6 @@ project ('spring-pulsar-test') {
 		api ("org.springframework.retry:spring-retry:$springRetryVersion") {
 			exclude group: 'org.springframework'
 		}
-
-		api "org.apache.kafka:kafka-clients:$kafkaVersion:test"
-		api "org.apache.kafka:kafka-streams:$kafkaVersion"
-		api "org.apache.kafka:kafka-streams-test-utils:$kafkaVersion"
-		api "org.apache.kafka:kafka_$scalaVersion:$kafkaVersion"
-		api "org.apache.kafka:kafka_$scalaVersion:$kafkaVersion:test"
 		api 'org.junit.jupiter:junit-jupiter-api'
 		optionalApi "org.hamcrest:hamcrest-core:$hamcrestVersion"
 		optionalApi "org.mockito:mockito-core:$mockitoVersion"
@@ -397,8 +387,7 @@ task api(type: Javadoc) {
 task docsZip(type: Zip, dependsOn: [reference]) {
 	group = 'Distribution'
 	archiveClassifier = 'docs'
-	description = "Builds -${archiveClassifier} archive containing api and reference " +
-			"for deployment at static.spring.io/spring-kafka/docs."
+	description = "Builds -${archiveClassifier} archive containing api and reference "
 
 	from('src/dist') {
 		include 'changelog.txt'
@@ -414,7 +403,7 @@ task docsZip(type: Zip, dependsOn: [reference]) {
 
 	from ('build/docs/asciidocPdf') {
 		include 'index.pdf'
-		rename 'index.pdf', 'spring-kafka-reference.pdf'
+		rename 'index.pdf', 'spring-pulsar-reference.pdf'
 		into 'reference/pdf'
 	}
 }
