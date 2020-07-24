@@ -8,6 +8,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * @author Charvak Patel
+ */
 public class PulsarAnnotationProcessor {
 
 	public Optional<PulsarListener> findClassLevelAnnotation(final Class<?> clz) {

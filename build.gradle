@@ -64,6 +64,7 @@ ext {
 	springRetryVersion = '1.2.5.RELEASE'
 	springVersion = '5.2.7.RELEASE'
 	idPrefix = 'pulsar'
+	pulsarVersion = '2.6.0'
 }
 
 nohttp {
@@ -236,6 +237,8 @@ project ('spring-pulsar') {
 		api ("org.springframework.retry:spring-retry:$springRetryVersion") {
 			exclude group: 'org.springframework'
 		}
+
+		api "org.apache.pulsar:pulsar-client:$pulsarVersion"
 
 		optionalApi 'com.fasterxml.jackson.core:jackson-core'
 		optionalApi 'com.fasterxml.jackson.core:jackson-databind'
