@@ -1,5 +1,7 @@
 package org.incolo.springpulsar.annotation;
 
+import org.apache.pulsar.client.api.PulsarClient;
+import org.apache.pulsar.client.api.PulsarClientException;
 import org.incolo.springpulsar.annotation.sample.ClassLevelAnnotation;
 import org.incolo.springpulsar.annotation.sample.MethodLevelKafkaListenerClass;
 import org.incolo.springpulsar.annotation.sample.NoAnnotationClass;
@@ -28,10 +30,13 @@ class PulsarAnnotationProcessorTest {
     }
 
     @Test
-    public void testMethodLevelAnnotatiions() {
+    public void testMethodLevelAnnotatiions() throws PulsarClientException {
         PulsarAnnotationProcessor sut = new PulsarAnnotationProcessor();
         assertEquals(2, sut.findMethodLevelAnnotations(MethodLevelKafkaListenerClass.class).size());
         assertTrue(sut.findMethodLevelHandlerAnnotations(MethodLevelKafkaListenerClass.class).isEmpty());
+
+        PulsarClient client = PulsarClient.builder().build();
+        client.newConsumer().topic("").subscribe();
     }
 
 }

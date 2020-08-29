@@ -5,7 +5,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.log.LogAccessor;
 
@@ -38,7 +41,6 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		this.logger.info("Bean post processor");
 		return bean;
 	}
 }
