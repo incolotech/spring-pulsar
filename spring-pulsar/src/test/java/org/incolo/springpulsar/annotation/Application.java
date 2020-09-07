@@ -14,6 +14,9 @@ public class Application {
     @Autowired
     PulsarListenerAnnotationBeanPostProcessor processor;
 
+    @Autowired
+	Config config;
+
     @Test
     public void init() {
         System.out.println("hello");
@@ -24,5 +27,9 @@ public class Application {
     @EnablePulsar
     public static class Config {
 
+    	@PulsarListener
+    	public void testing() {
+
+		}
     }
 }

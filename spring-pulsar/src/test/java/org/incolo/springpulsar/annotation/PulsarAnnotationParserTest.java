@@ -7,23 +7,22 @@ import org.incolo.springpulsar.annotation.sample.MethodLevelKafkaListenerClass;
 import org.incolo.springpulsar.annotation.sample.NoAnnotationClass;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class PulsarAnnotationProcessorTest {
+class PulsarAnnotationParserTest {
 
 
     @Test
     public void shouldReturnOptionalNull() {
-        PulsarAnnotationProcessor sut = new PulsarAnnotationProcessor();
-        assertTrue(sut.findClassLevelAnnotation(NoAnnotationClass.class).isEmpty());
+        PulsarAnnotationParser sut = new PulsarAnnotationParser();
+        assertFalse(sut.findClassLevelAnnotation(NoAnnotationClass.class).isPresent());
         assertTrue(sut.findMethodLevelAnnotations(NoAnnotationClass.class).isEmpty());
         assertTrue(sut.findMethodLevelHandlerAnnotations(NoAnnotationClass.class).isEmpty());
     }
 
     @Test
     public void testClassLevelAnnotation() {
-        PulsarAnnotationProcessor sut = new PulsarAnnotationProcessor();
+        PulsarAnnotationParser sut = new PulsarAnnotationParser();
         assertTrue(sut.findClassLevelAnnotation(ClassLevelAnnotation.class).isPresent());
         assertEquals(2, sut.findMethodLevelHandlerAnnotations(ClassLevelAnnotation.class).size());
         assertTrue(sut.findMethodLevelAnnotations(ClassLevelAnnotation.class).isEmpty());
@@ -31,7 +30,7 @@ class PulsarAnnotationProcessorTest {
 
     @Test
     public void testMethodLevelAnnotatiions() throws PulsarClientException {
-        PulsarAnnotationProcessor sut = new PulsarAnnotationProcessor();
+        PulsarAnnotationParser sut = new PulsarAnnotationParser();
         assertEquals(2, sut.findMethodLevelAnnotations(MethodLevelKafkaListenerClass.class).size());
         assertTrue(sut.findMethodLevelHandlerAnnotations(MethodLevelKafkaListenerClass.class).isEmpty());
 

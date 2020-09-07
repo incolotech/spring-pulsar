@@ -1,6 +1,7 @@
 package org.incolo.springpulsar.annotation;
 
 import org.apache.commons.logging.LogFactory;
+import org.incolo.springpulsar.core.MethodLevelPulsarListenerPipeline;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -24,6 +25,8 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 
 	private BeanFactory beanFactory;
 
+	private MethodLevelPulsarListenerPipeline methodLevelPulsarListenerPipeline = new MethodLevelPulsarListenerPipeline();
+
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
@@ -41,6 +44,7 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		methodLevelPulsarListenerPipeline.process(bean, beanName);
 		return bean;
 	}
 }

@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * @author Charvak Patel
  */
-public class PulsarAnnotationProcessor {
+public class PulsarAnnotationParser {
 
 	public Optional<PulsarListener> findClassLevelAnnotation(final Class<?> clz) {
 		return Optional.ofNullable(clz)

@@ -1,8 +1,9 @@
 package org.incolo.springpulsar.core;
 
-import org.incolo.springpulsar.annotation.PulsarAnnotationProcessor;
+import org.incolo.springpulsar.annotation.PulsarAnnotationParser;
 
-import java.awt.image.ImageProducer;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -11,20 +12,21 @@ import java.util.stream.Stream;
  */
 public class MethodLevelPulsarListenerPipeline {
 
-    private PulsarAnnotationProcessor annotationProcessor = new PulsarAnnotationProcessor();
-    private PulsarAnnotationTransformer annotationTransformer = new PulsarAnnotationTransformer();
+	private PulsarAnnotationParser annotationParser = new PulsarAnnotationParser();
+	private PulsarAnnotationTransformer annotationTransformer = new PulsarAnnotationTransformer();
 
-    public void process(Object bean, String beanName) {
-        Optional.ofNullable(bean)
-                .map(Object::getClass)
-                .map(annotationProcessor::findMethodLevelAnnotations)
-                .stream()
-                .flatMap(mappings -> mappings.entrySet().stream())
-                .map(entry -> annotationTransformer.process(entry.getValue(), entry.getKey(), bean, beanName))
-                .forEach(
-                        x -> System.out.println(x)
-                );
-        ;
+	public void process(Object bean, String beanName) {
+		Optional.ofNullable(bean)
+				.map(Object::getClass)
+				.map(annotationParser::findMethodLevelAnnotations)
+				.map(Map::entrySet)
+				.map(Collection::stream)
+				.orElse(Stream.empty())
+				.map(entry -> annotationTransformer.process(entry.getValue(), entry.getKey(), bean, beanName))
+				.forEach(
+						o -> System.out.println(o)
+				);
+		;
 
-    }
+	}
 }
