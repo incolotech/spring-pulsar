@@ -1,11 +1,15 @@
 package org.incolo.springpulsar.annotation;
 
 import org.apache.commons.logging.LogFactory;
+import org.incolo.springpulsar.core.MethodLevelPulsarListenerPipeline;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.config.BeanExpressionContext;
+import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.log.LogAccessor;
 
@@ -20,6 +24,8 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 	public static final String PULSAR_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME = "org.incolo.springpulsar.annotation.DefaultPulsarListenerAnnotationBeanPostProcessor";
 
 	private BeanFactory beanFactory;
+
+	private MethodLevelPulsarListenerPipeline methodLevelPulsarListenerPipeline = new MethodLevelPulsarListenerPipeline();
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
@@ -38,7 +44,7 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		this.logger.info("Bean post processor");
+		methodLevelPulsarListenerPipeline.process(bean, beanName);
 		return bean;
 	}
 }
