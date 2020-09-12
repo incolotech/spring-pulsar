@@ -20,19 +20,23 @@ import java.time.LocalDateTime;
 @SpringJUnitConfig
 public class Application {
 
-    @Autowired
-	Config config;
-
     @Test
     public void init() throws InterruptedException {
     	Thread.sleep(10000);
-    }
+	}
+    PulsarListenerAnnotationBeanPostProcessor processor;
+
+    @Autowired
+	PulsarListenerContainerRegistry registry;
+
+    @Autowired
+	Config config;
+
 
 
     @Configuration
     @EnablePulsar
     public static class Config {
-
 
     	@Bean
 		public PulsarClient pulsarClient() throws PulsarClientException {
