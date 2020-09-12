@@ -146,7 +146,7 @@ subprojects { subproject ->
 	// dependencies that are common across all java projects
 	dependencies {
 		compileOnly "com.google.code.findbugs:jsr305:$googleJsr305Version"
-		compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
+		testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
 		testImplementation 'org.junit.jupiter:junit-jupiter-api'
 		testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
