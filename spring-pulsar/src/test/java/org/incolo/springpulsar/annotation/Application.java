@@ -23,6 +23,7 @@ public class Application {
     @Test
     public void init() throws InterruptedException {
     	Thread.sleep(10000);
+
 	}
     PulsarListenerAnnotationBeanPostProcessor processor;
 
