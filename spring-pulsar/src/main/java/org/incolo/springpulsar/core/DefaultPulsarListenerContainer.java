@@ -1,9 +1,11 @@
 package org.incolo.springpulsar.core;
 
+import org.apache.commons.logging.LogFactory;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
+import org.springframework.core.log.LogAccessor;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
@@ -16,6 +18,8 @@ import java.util.HashMap;
  * @author Charvak Patel
  */
 public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
+
+	protected final LogAccessor logger = new LogAccessor(LogFactory.getLog(getClass()));
 
 	private final PulsarListenerEndpoint<?> endpoint;
 	private final ConsumerFactory consumerFactory;
@@ -39,6 +43,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 		synchronized (this.lifecycleMonitor) {
 			if (!isRunning()) {
 				try {
+					this.isRunning = true;
 					this.taskExecutor.submit(
 							new ContainerTask(consumerFactory.createConsumer(endpoint),
 									messageHandlerMethodFactory.createInvocableHandlerMethod(endpoint.getBean(), endpoint.getMethod())));
@@ -53,7 +58,8 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
 			if (isRunning()) {
-				isRunning = true;
+				isRunning = false;
+				logger.info("Stopping the container");
 			}
 		}
 	}
@@ -97,15 +103,16 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 
 			Message<?> pulsarMessage = consumer.receive();
 
-			org.springframework.messaging.Message message = MessageBuilder.createMessage(new String(pulsarMessage.getData()), new MessageHeaders(new HashMap<>() {{
-				put("key", pulsarMessage.getKey());
-				putAll(pulsarMessage.getProperties());
-			}}));
+			org.springframework.messaging.Message message =
+					MessageBuilder.createMessage(new String(pulsarMessage.getData()),
+							new MessageHeaders(new HashMap<String, Object>() {{
+								put("key", pulsarMessage.getKey());
+								putAll(pulsarMessage.getProperties());
+							}}));
 
 			this.handlerMethod.invoke(message);
 
 		}
-
 
 
 	}

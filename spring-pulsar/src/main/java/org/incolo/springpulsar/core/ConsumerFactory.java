@@ -41,9 +41,11 @@ public class ConsumerFactory {
 		builder.subscriptionType(endpoint.getSubscriptionType());
 		builder.subscriptionInitialPosition(endpoint.getSubscriptionInitialPosition());
 
-		builder.properties(endpoint.getProperties().entrySet().stream()
-				.filter(e -> e.getKey() instanceof String && e.getValue() instanceof String)
-				.collect(Collectors.toMap(t -> (String) t.getKey(), t -> (String) t.getValue())));
+		if (!endpoint.getProperties().isEmpty()) {
+			builder.properties(endpoint.getProperties().entrySet().stream()
+					.filter(e -> e.getKey() instanceof String && e.getValue() instanceof String)
+					.collect(Collectors.toMap(t -> (String) t.getKey(), t -> (String) t.getValue())));
+		}
 
 
 		return builder.subscribe();

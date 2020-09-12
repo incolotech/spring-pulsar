@@ -14,7 +14,11 @@ public class MethodLevelPulsarListenerPipeline {
 
 	private PulsarAnnotationParser annotationParser = new PulsarAnnotationParser();
 	private PulsarAnnotationTransformer annotationTransformer = new PulsarAnnotationTransformer();
-	private PulsarListenerContainerRegistry containerRegistry = new PulsarListenerContainerRegistry();
+	private final PulsarListenerContainerRegistry containerRegistry;
+
+	public MethodLevelPulsarListenerPipeline(PulsarListenerContainerRegistry containerRegistry) {
+		this.containerRegistry = containerRegistry;
+	}
 
 	public void process(Object bean, String beanName) {
 		Optional.ofNullable(bean)
