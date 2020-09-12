@@ -1,3 +1,11 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url 'https://repo.spring.io/plugins-release' }
+    }
+}
+
+
 rootProject.name = 'spring-pulsar'
 
 include 'spring-pulsar'
