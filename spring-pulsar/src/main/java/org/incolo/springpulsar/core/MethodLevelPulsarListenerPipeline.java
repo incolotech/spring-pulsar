@@ -14,6 +14,7 @@ public class MethodLevelPulsarListenerPipeline {
 
 	private PulsarAnnotationParser annotationParser = new PulsarAnnotationParser();
 	private PulsarAnnotationTransformer annotationTransformer = new PulsarAnnotationTransformer();
+	private PulsarListenerContainerRegistry containerRegistry = new PulsarListenerContainerRegistry();
 
 	public void process(Object bean, String beanName) {
 		Optional.ofNullable(bean)
@@ -23,9 +24,7 @@ public class MethodLevelPulsarListenerPipeline {
 				.map(Collection::stream)
 				.orElse(Stream.empty())
 				.map(entry -> annotationTransformer.process(entry.getValue(), entry.getKey(), bean, beanName))
-				.forEach(
-						o -> System.out.println(o)
-				);
+				.forEach(containerRegistry::registerContainer)
 		;
 
 	}

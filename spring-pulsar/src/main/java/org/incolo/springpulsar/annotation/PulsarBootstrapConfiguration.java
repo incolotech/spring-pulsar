@@ -16,6 +16,7 @@
 
 package org.incolo.springpulsar.annotation;
 
+import org.incolo.springpulsar.core.PulsarListenerContainerRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -33,6 +34,11 @@ public class PulsarBootstrapConfiguration implements ImportBeanDefinitionRegistr
 
 			registry.registerBeanDefinition(PulsarListenerAnnotationBeanPostProcessor.PULSAR_LISTENER_ANNOTATION_PROCESSOR_BEAN_NAME,
 					new RootBeanDefinition(PulsarListenerAnnotationBeanPostProcessor.class));
+		}
+
+		if (!registry.containsBeanDefinition(PulsarListenerContainerRegistry.PULSAR_LISTENER_CONTAINER_REGISTRY_BEAN_NAME)) {
+			registry.registerBeanDefinition(PulsarListenerContainerRegistry.PULSAR_LISTENER_CONTAINER_REGISTRY_BEAN_NAME,
+					new RootBeanDefinition(PulsarListenerContainerRegistry.class));
 		}
 	}
 

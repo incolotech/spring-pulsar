@@ -1,33 +1,71 @@
 package org.incolo.springpulsar.core;
 
+import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
+import org.incolo.springpulsar.config.PulsarListenerEndpoint;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.util.Assert;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Charvak Patel
  */
-public class PulsarListenerContainerRegistry implements SmartLifecycle {
+public class PulsarListenerContainerRegistry implements SmartLifecycle, BeanFactoryAware {
 
-    private ConcurrentHashMap<String, PulsarListenerContainer> listeners = new ConcurrentHashMap<>();
+	public static final String PULSAR_LISTENER_CONTAINER_REGISTRY_BEAN_NAME = "org.incolo.springpulsar.annotation.DefaultPulsarListenerContainerRegistry";
 
-    private boolean isRunning;
+	public static final String DEFAULT_CONTAINER_FACTORY_BEAN_NAME = "defaultPulsarListenerContainerFactory";
 
-    @Override
-    public void start() {
-        listeners.forEachValue(0, Lifecycle::start);
-        isRunning = true;
-    }
+	private final ConcurrentHashMap<String, PulsarListenerContainer> containers = new ConcurrentHashMap<>();
 
-    @Override
-    public void stop() {
-        listeners.forEachValue(0, Lifecycle::stop);
-        isRunning = false;
-    }
+	private boolean isRunning;
 
-    @Override
-    public boolean isRunning() {
-        return isRunning;
-    }
+	private String defaultContainerFactoryBeanName = DEFAULT_CONTAINER_FACTORY_BEAN_NAME;
+	private BeanFactory beanFactory;
+
+	@Override
+	public void start() {
+		containers.forEachValue(0, Lifecycle::start);
+		isRunning = true;
+	}
+
+	@Override
+	public void stop() {
+		containers.forEachValue(0, container -> container.stop());
+		isRunning = false;
+	}
+
+	public void registerContainer(PulsarListenerEndpoint<?> endpoint) {
+		PulsarListenerContainer container = resolveFactory(endpoint).createListenerContainer(endpoint);
+		String id = container.getEndpoint().getId();
+		synchronized (this.containers) {
+			Assert.state(!this.containers.containsKey(id),
+					"Another endpoint is already registered with id '" + id + "'");
+
+			this.containers.put(id, container);
+			container.start();
+		}
+	}
+
+	private PulsarListenerContainerFactory<?> resolveFactory(PulsarListenerEndpoint<?> endpoint) {
+		if (StringUtils.isNotBlank(endpoint.getContainerFactory())) {
+			return this.beanFactory.getBean(endpoint.getContainerFactory(), PulsarListenerContainerFactory.class);
+		} else {
+			return this.beanFactory.getBean(this.defaultContainerFactoryBeanName, PulsarListenerContainerFactory.class);
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return isRunning;
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		this.beanFactory = beanFactory;
+	}
 }
