@@ -1,4 +1,4 @@
-package org.incolo.springpulsar.core;
+package org.incolo.springpulsar.config;
 
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.ConsumerBuilder;
@@ -6,17 +6,19 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.shade.org.apache.commons.lang3.ArrayUtils;
 import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
-import org.incolo.springpulsar.config.PulsarListenerEndpoint;
-import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class ConsumerFactory {
+public class DefaultConsumerFactory implements ConsumerFactory {
 
-	final PulsarClient client;
+	private final PulsarClient client;
 
-	public ConsumerFactory(PulsarClient client) {
+	public DefaultConsumerFactory(ClientFactory clientFactory) {
+		this(clientFactory.createClient());
+	}
+
+	public DefaultConsumerFactory(PulsarClient client) {
 		this.client = client;
 	}
 

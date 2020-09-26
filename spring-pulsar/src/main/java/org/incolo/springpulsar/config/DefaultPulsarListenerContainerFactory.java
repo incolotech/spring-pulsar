@@ -1,6 +1,6 @@
-package org.incolo.springpulsar.core;
+package org.incolo.springpulsar.config;
 
-import org.incolo.springpulsar.config.PulsarListenerEndpoint;
+import org.incolo.springpulsar.core.DefaultPulsarListenerContainer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
