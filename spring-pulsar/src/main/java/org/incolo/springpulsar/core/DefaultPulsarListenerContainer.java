@@ -30,14 +30,18 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	private volatile boolean isRunning = false;
 	private final Object lifecycleMonitor = new Object();
 
-	private final DefaultMessageHandlerMethodFactory messageHandlerMethodFactory;
+	private final MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory;
 
 
-	public DefaultPulsarListenerContainer(PulsarListenerEndpoint<?> endpoint, ConsumerFactory consumerFactory, AsyncListenableTaskExecutor taskExecutor, DefaultMessageHandlerMethodFactory messageHandlerMethodFactory) {
+	public DefaultPulsarListenerContainer(
+			PulsarListenerEndpoint<?> endpoint,
+			ConsumerFactory consumerFactory,
+			AsyncListenableTaskExecutor taskExecutor,
+			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
 		this.endpoint = endpoint;
 		this.consumerFactory = consumerFactory;
 		this.taskExecutor = taskExecutor;
-		this.messageHandlerMethodFactory = messageHandlerMethodFactory;
+		this.messageProcessorFactory = messageProcessorFactory;
 	}
 
 	@Override
@@ -48,7 +52,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 					this.isRunning = true;
 					this.taskExecutor.submit(
 							new ContainerTask(consumerFactory.createConsumer(endpoint),
-									messageHandlerMethodFactory.createInvocableHandlerMethod(endpoint.getBean(), endpoint.getMethod())));
+									messageProcessorFactory.createMessageProcessor(endpoint.getBean(), endpoint.getMethod())));
 				} catch (PulsarClientException e) {
 					e.printStackTrace();
 				}
@@ -80,11 +84,11 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	private final class ContainerTask implements Runnable {
 
 		private final Consumer<?> consumer;
-		private final InvocableHandlerMethod handlerMethod;
+		private final MessageProcessor messageProcessor;
 
-		public ContainerTask(Consumer<?> consumer, InvocableHandlerMethod invocableHandlerMethod) {
+		public ContainerTask(Consumer<?> consumer, MessageProcessor messageProcessor) {
 			this.consumer = consumer;
-			this.handlerMethod = invocableHandlerMethod;
+			this.messageProcessor = messageProcessor;
 		}
 
 
@@ -93,8 +97,6 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			while (isRunning()) {
 				try {
 					processMessage();
-				} catch (PulsarClientException e) {
-					e.printStackTrace();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -102,18 +104,8 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 		}
 
 		private void processMessage() throws Exception {
-
 			Message<?> pulsarMessage = consumer.receive();
-
-			org.springframework.messaging.Message message =
-					MessageBuilder.createMessage(new String(pulsarMessage.getData()),
-							new MessageHeaders(new HashMap<String, Object>() {{
-								put("key", pulsarMessage.getKey());
-								putAll(pulsarMessage.getProperties());
-							}}));
-
-			this.handlerMethod.invoke(message);
-
+			this.messageProcessor.process(pulsarMessage, consumer);
 		}
 
 

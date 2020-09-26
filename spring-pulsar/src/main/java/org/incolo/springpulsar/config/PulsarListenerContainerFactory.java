@@ -9,5 +9,5 @@ import org.incolo.springpulsar.core.PulsarListenerContainer;
  */
 public interface PulsarListenerContainerFactory<ContainerT extends PulsarListenerContainer> {
 
-    ContainerT createListenerContainer(PulsarListenerEndpoint endpoint);
+    ContainerT createListenerContainer(PulsarListenerEndpoint<?> endpoint);
 }
