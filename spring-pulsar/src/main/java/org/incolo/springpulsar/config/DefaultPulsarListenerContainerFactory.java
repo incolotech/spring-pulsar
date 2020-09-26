@@ -1,6 +1,6 @@
 package org.incolo.springpulsar.config;
 
-import org.incolo.springpulsar.core.DefaultPulsarListenerContainer;
+import org.incolo.springpulsar.core.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -18,7 +18,7 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 	private final ConsumerFactory consumerFactory;
 	private SimpleAsyncTaskExecutor executor;
 	private BeanFactory beanFactory;
-	private DefaultMessageHandlerMethodFactory defaultMessageHandlerMethodFactory;
+	private MessageProcessorFactory<? extends MessageProcessor> defaultMessageProcessorFactory;
 
 	public DefaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
 		this.consumerFactory = consumerFactory;
@@ -26,8 +26,8 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 
 
 	@Override
-	public DefaultPulsarListenerContainer createListenerContainer(PulsarListenerEndpoint endpoint) {
-		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, this.defaultMessageHandlerMethodFactory);
+	public DefaultPulsarListenerContainer createListenerContainer(PulsarListenerEndpoint<?> endpoint) {
+		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, this.defaultMessageProcessorFactory);
 	}
 
 	@Override
@@ -35,20 +35,9 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 		this.beanFactory = beanFactory;
 	}
 
-	public DefaultMessageHandlerMethodFactory setUpMessageHandlerFactory() {
-		DefaultMessageHandlerMethodFactory defaultFactory = new DefaultMessageHandlerMethodFactory();
-		defaultFactory.setBeanFactory(this.beanFactory);
-		DefaultConversionService defaultFormattingConversionService = new DefaultConversionService();
-		defaultFactory.setConversionService(defaultFormattingConversionService);
-		GenericMessageConverter messageConverter = new GenericMessageConverter(defaultFormattingConversionService);
-		defaultFactory.setMessageConverter(messageConverter);
-		defaultFactory.afterPropertiesSet();
-		return defaultFactory;
-	}
-
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		executor = new SimpleAsyncTaskExecutor();
-		defaultMessageHandlerMethodFactory = setUpMessageHandlerFactory();
+		defaultMessageProcessorFactory = new DefaultMessageProcessorFactory(this.beanFactory);
 	}
 }

@@ -1,5 +1,6 @@
 package org.incolo.springpulsar.annotation;
 
+import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.incolo.springpulsar.config.*;
@@ -53,8 +54,8 @@ public class Application {
 				subscriptionName = "sample-test",
 				subscriptionType = SubscriptionType.Shared
 		)
-		public void testing(@Payload String msg, @Header("key") String key) {
-			System.out.println("Message : " + msg);
+		public void testing(Message<byte[]> msg, @Header("key") String key) {
+			System.out.println("Message : " + msg.getData().toString());
 			System.out.println("Key : " + msg);
 		}
 	}
