@@ -1,6 +1,7 @@
 package org.incolo.springpulsar.core;
 
 import org.incolo.springpulsar.annotation.PulsarAnnotationParser;
+import org.incolo.springpulsar.config.PulsarListenerContainerRegistry;
 
 import java.util.Collection;
 import java.util.Map;

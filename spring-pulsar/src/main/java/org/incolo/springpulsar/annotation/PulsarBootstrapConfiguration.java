@@ -16,7 +16,7 @@
 
 package org.incolo.springpulsar.annotation;
 
-import org.incolo.springpulsar.core.PulsarListenerContainerRegistry;
+import org.incolo.springpulsar.config.PulsarListenerContainerRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
