@@ -36,4 +36,6 @@ public interface PulsarListenerEndpoint<V> {
     String getBeanName();
 
     Object getBean();
+
+	SchemaProvider getSchemaProvider();
 }

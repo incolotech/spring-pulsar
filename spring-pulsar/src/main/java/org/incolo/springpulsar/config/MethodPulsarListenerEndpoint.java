@@ -39,6 +39,8 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint{
 
     private Object bean;
 
+    private SchemaProvider schemaProvider;
+
     @Override
     public String getId() {
         return id;
@@ -155,4 +157,13 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint{
     public void setBean(Object bean) {
         this.bean = bean;
     }
+
+    @Override
+	public SchemaProvider getSchemaProvider() {
+		return schemaProvider;
+	}
+
+	public void setSchemaProvider(SchemaProvider schemaProvider) {
+		this.schemaProvider = schemaProvider;
+	}
 }

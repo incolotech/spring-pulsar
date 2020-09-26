@@ -32,7 +32,8 @@ public class PulsarListenerAnnotationBeanPostProcessor implements BeanPostProces
 		this.beanFactory = beanFactory;
 		methodLevelPulsarListenerPipeline =
 				new MethodLevelPulsarListenerPipeline(
-						this.beanFactory.getBean(PULSAR_LISTENER_CONTAINER_REGISTRY_BEAN_NAME, PulsarListenerContainerRegistry.class));
+						this.beanFactory.getBean(PULSAR_LISTENER_CONTAINER_REGISTRY_BEAN_NAME, PulsarListenerContainerRegistry.class),
+						beanFactory);
 	}
 
 	@Override

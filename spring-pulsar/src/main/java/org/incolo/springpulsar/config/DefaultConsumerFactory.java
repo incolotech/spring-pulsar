@@ -1,9 +1,6 @@
 package org.incolo.springpulsar.config;
 
-import org.apache.pulsar.client.api.Consumer;
-import org.apache.pulsar.client.api.ConsumerBuilder;
-import org.apache.pulsar.client.api.PulsarClient;
-import org.apache.pulsar.client.api.PulsarClientException;
+import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.shade.org.apache.commons.lang3.ArrayUtils;
 import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 
@@ -22,9 +19,8 @@ public class DefaultConsumerFactory implements ConsumerFactory {
 		this.client = client;
 	}
 
-	public Consumer<byte[]> createConsumer(PulsarListenerEndpoint<?> endpoint) throws PulsarClientException {
-		ConsumerBuilder<byte[]> builder = this.client.newConsumer();
-
+	public Consumer<?> createConsumer(PulsarListenerEndpoint<?> endpoint) throws PulsarClientException {
+		ConsumerBuilder<?> builder = this.client.newConsumer(endpoint.getSchemaProvider().getSchema());
 		if (StringUtils.isNotBlank(endpoint.getConsumerName())) {
 			builder.consumerName(endpoint.getConsumerName());
 		}
