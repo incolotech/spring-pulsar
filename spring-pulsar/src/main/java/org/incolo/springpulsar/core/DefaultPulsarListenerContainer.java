@@ -4,6 +4,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.incolo.springpulsar.config.ConsumerFactory;
+import org.incolo.springpulsar.config.DefaultConsumerFactory;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
 import org.springframework.core.log.LogAccessor;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
