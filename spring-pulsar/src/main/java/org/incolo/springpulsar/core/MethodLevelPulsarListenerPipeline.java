@@ -2,6 +2,7 @@ package org.incolo.springpulsar.core;
 
 import org.incolo.springpulsar.annotation.PulsarAnnotationParser;
 import org.incolo.springpulsar.config.PulsarListenerContainerRegistry;
+import org.springframework.beans.factory.BeanFactory;
 
 import java.util.Collection;
 import java.util.Map;
@@ -13,12 +14,13 @@ import java.util.stream.Stream;
  */
 public class MethodLevelPulsarListenerPipeline {
 
-	private PulsarAnnotationParser annotationParser = new PulsarAnnotationParser();
-	private PulsarAnnotationTransformer annotationTransformer = new PulsarAnnotationTransformer();
+	private final PulsarAnnotationParser annotationParser = new PulsarAnnotationParser();
+	private final PulsarAnnotationTransformer annotationTransformer;
 	private final PulsarListenerContainerRegistry containerRegistry;
 
-	public MethodLevelPulsarListenerPipeline(PulsarListenerContainerRegistry containerRegistry) {
+	public MethodLevelPulsarListenerPipeline(PulsarListenerContainerRegistry containerRegistry, BeanFactory beanFactory) {
 		this.containerRegistry = containerRegistry;
+		this.annotationTransformer = new PulsarAnnotationTransformer(beanFactory);
 	}
 
 	public void process(Object bean, String beanName) {

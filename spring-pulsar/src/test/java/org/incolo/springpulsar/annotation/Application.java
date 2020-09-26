@@ -3,13 +3,15 @@ package org.incolo.springpulsar.annotation;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.SubscriptionType;
+import org.incolo.springpulsar.annotation.sample.CustomData;
 import org.incolo.springpulsar.config.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
@@ -18,17 +20,18 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 public class Application {
 
-    @Test
-    public void init() throws InterruptedException {
-    	Thread.sleep(10000);
+	@Test
+	public void init() throws InterruptedException {
+		Thread.sleep(10000);
 	}
-    @Autowired
-	Config config;
 
+	@Autowired
+	Config config;
 
 
 	@Configuration
 	@EnablePulsar
+	@ComponentScan()
 	public static class Config {
 
 
@@ -52,9 +55,10 @@ public class Application {
 		@PulsarListener(
 				topics = "persistent://public/default/sample-test",
 				subscriptionName = "sample-test",
-				subscriptionType = SubscriptionType.Shared
+				subscriptionType = SubscriptionType.Shared,
+				jsonSchema = CustomData.class
 		)
-		public void testing(Message<byte[]> msg, @Header("key") String key) {
+		public void testing(CustomData payload, Message<?> msg) {
 			System.out.println("Message : " + msg.getData().toString());
 			System.out.println("Key : " + msg);
 		}
