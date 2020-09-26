@@ -14,7 +14,7 @@ public class DefaultConsumerFactory implements ConsumerFactory {
 
 	private final PulsarClient client;
 
-	public DefaultConsumerFactory(ClientFactory clientFactory) {
+	public DefaultConsumerFactory(ClientFactory clientFactory) throws PulsarClientException {
 		this(clientFactory.createClient());
 	}
 

@@ -20,13 +20,7 @@ public class Application {
     @Test
     public void init() throws InterruptedException {
     	Thread.sleep(10000);
-
 	}
-    PulsarListenerAnnotationBeanPostProcessor processor;
-
-    @Autowired
-	PulsarListenerContainerRegistry registry;
-
     @Autowired
 	Config config;
 
@@ -45,7 +39,7 @@ public class Application {
 		}
 
 		@Bean
-		public ConsumerFactory consumerFactory(ClientFactory client) {
+		public ConsumerFactory consumerFactory(ClientFactory client) throws PulsarClientException {
 			return new DefaultConsumerFactory(client);
 		}
 
