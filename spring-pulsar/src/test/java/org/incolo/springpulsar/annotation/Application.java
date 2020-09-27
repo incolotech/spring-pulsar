@@ -2,12 +2,14 @@ package org.incolo.springpulsar.annotation;
 
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.incolo.springpulsar.config.*;
 import org.incolo.springpulsar.core.PrimitiveTypeSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -23,14 +25,13 @@ public class Application {
 	}
 
 	@Autowired
-	Config config;
+	public Config config;
 
 
 	@Configuration
 	@EnablePulsar
+	@ComponentScan(basePackageClasses = CustomSchemaProvider.class)
 	public static class Config {
-
-
 		@Bean
 		public ClientFactory clientFactory() throws PulsarClientException {
 			return new DefaultClientFactory(
@@ -52,7 +53,7 @@ public class Application {
 				topics = "persistent://public/default/sample-test",
 				subscriptionName = "sample-test",
 				subscriptionType = SubscriptionType.Shared,
-				primitiveTypeSchema = PrimitiveTypeSchema.STRING
+				schemaProviderBeanClass = CustomSchemaProvider.class
 		)
 		public void testing(String payload, Message<?> msg) {
 			System.out.println("Message : " + payload);
