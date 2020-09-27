@@ -18,12 +18,13 @@ public class BaseMessageProcessor implements MessageProcessor {
 
 	protected final LogAccessor logger = new LogAccessor(LogFactory.getLog(getClass()));
 
-
-
 	private final InvocableHandlerMethod invocableHandlerMethod;
 
-	public BaseMessageProcessor(InvocableHandlerMethod invocableHandlerMethod) {
+	private final MessageConverter messageConverter;
+
+	public BaseMessageProcessor(InvocableHandlerMethod invocableHandlerMethod, MessageConverter messageConverter) {
 		this.invocableHandlerMethod = invocableHandlerMethod;
+		this.messageConverter = messageConverter;
 	}
 
 	@Override

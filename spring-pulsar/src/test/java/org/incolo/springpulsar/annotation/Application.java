@@ -9,6 +9,7 @@ import org.incolo.springpulsar.core.PrimitiveTypeSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
@@ -54,7 +55,7 @@ public class Application {
 				subscriptionType = SubscriptionType.Shared,
 				schemaProviderBeanClass = CustomSchemaProvider.class
 		)
-		public void testing(String payload, Message<?> msg) {
+		public void testing(String payload, Object payload1,Message<?> msg) {
 			System.out.println("Message : " + payload);
 			System.out.println("Key : " + msg);
 		}
