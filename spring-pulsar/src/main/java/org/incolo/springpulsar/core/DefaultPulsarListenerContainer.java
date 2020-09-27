@@ -36,7 +36,8 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			PulsarListenerEndpoint<?> endpoint,
 			ConsumerFactory consumerFactory,
 			AsyncListenableTaskExecutor taskExecutor,
-			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
+			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory,
+			MessageConverter messageConverter) {
 		this.endpoint = endpoint;
 		this.consumerFactory = consumerFactory;
 		this.taskExecutor = taskExecutor;

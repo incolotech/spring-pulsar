@@ -10,15 +10,25 @@ import java.lang.reflect.Method;
 
 public class DefaultMessageProcessorFactory implements MessageProcessorFactory<BaseMessageProcessor> {
 
-	final MessageHandlerMethodFactory messageHandlerMethodFactory;
+	private final MessageHandlerMethodFactory messageHandlerMethodFactory;
+	private final MessageConverter messageConverter;
 
 	public DefaultMessageProcessorFactory(BeanFactory beanFactory) {
 		this.messageHandlerMethodFactory = setUpMessageHandlerFactory(beanFactory);
+		this.messageConverter = new SimpleMessageConverter();
+	}
+
+	public DefaultMessageProcessorFactory(BeanFactory beanFactory, MessageConverter messageConverter) {
+		this.messageHandlerMethodFactory = setUpMessageHandlerFactory(beanFactory);
+		this.messageConverter = messageConverter;
 	}
 
 	@Override
 	public BaseMessageProcessor createMessageProcessor(Object bean, Method method) {
-		return new BaseMessageProcessor(this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method));
+		return new BaseMessageProcessor(
+				this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method),
+				this.messageConverter
+		);
 	}
 
 	public static MessageHandlerMethodFactory setUpMessageHandlerFactory(BeanFactory beanFactory) {

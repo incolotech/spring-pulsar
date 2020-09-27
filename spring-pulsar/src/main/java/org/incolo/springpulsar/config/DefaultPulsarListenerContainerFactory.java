@@ -19,15 +19,22 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 	private SimpleAsyncTaskExecutor executor;
 	private BeanFactory beanFactory;
 	private MessageProcessorFactory<? extends MessageProcessor> defaultMessageProcessorFactory;
+	private final MessageConverter messageConverter;
 
 	public DefaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
 		this.consumerFactory = consumerFactory;
+		this.messageConverter = new SimpleMessageConverter();
+	}
+
+	public DefaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory, MessageConverter messageConverter) {
+		this.consumerFactory = consumerFactory;
+		this.messageConverter = messageConverter;
 	}
 
 
 	@Override
 	public DefaultPulsarListenerContainer createListenerContainer(PulsarListenerEndpoint<?> endpoint) {
-		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, this.defaultMessageProcessorFactory);
+		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, defaultMessageProcessorFactory, messageConverter);
 	}
 
 	@Override
