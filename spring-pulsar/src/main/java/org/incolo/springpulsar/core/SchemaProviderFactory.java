@@ -6,7 +6,6 @@ import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 import org.incolo.springpulsar.annotation.NullType;
 import org.incolo.springpulsar.annotation.PulsarListener;
 import org.incolo.springpulsar.config.SchemaProvider;
-import org.incolo.springpulsar.util.CollectionUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.log.LogAccessor;
 import org.springframework.util.ReflectionUtils;
@@ -46,7 +45,7 @@ public class SchemaProviderFactory {
 						pl -> getSchemaProvider(beanFactory.getBean(pl.schemaProviderBeanClass()))),
 				new ProviderHolder("schemaProviderBeanName",
 						pl -> StringUtils.isNotBlank(pl.schemaProviderBeanName()),
-						pl -> getSchemaProvider(beanFactory.getBean(pl.schemaProviderBeanClass()))),
+						pl -> getSchemaProvider(beanFactory.getBean(pl.schemaProviderBeanName()))),
 				new ProviderHolder("isAutoSchema",
 						PulsarListener::isAutoSchema,
 						pl -> Schema::AUTO_CONSUME),
