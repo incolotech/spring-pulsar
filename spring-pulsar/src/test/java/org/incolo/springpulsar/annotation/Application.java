@@ -3,15 +3,12 @@ package org.incolo.springpulsar.annotation;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.SubscriptionType;
-import org.incolo.springpulsar.annotation.sample.CustomData;
 import org.incolo.springpulsar.config.*;
+import org.incolo.springpulsar.core.PrimitiveTypeSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 /**
@@ -31,7 +28,6 @@ public class Application {
 
 	@Configuration
 	@EnablePulsar
-	@ComponentScan()
 	public static class Config {
 
 
@@ -56,10 +52,10 @@ public class Application {
 				topics = "persistent://public/default/sample-test",
 				subscriptionName = "sample-test",
 				subscriptionType = SubscriptionType.Shared,
-				jsonSchema = CustomData.class
+				primitiveTypeSchema = PrimitiveTypeSchema.STRING
 		)
-		public void testing(CustomData payload, Message<?> msg) {
-			System.out.println("Message : " + msg.getData().toString());
+		public void testing(String payload, Message<?> msg) {
+			System.out.println("Message : " + payload);
 			System.out.println("Key : " + msg);
 		}
 	}
