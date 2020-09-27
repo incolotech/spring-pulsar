@@ -49,7 +49,11 @@ public class SchemaProviderFactory {
 						pl -> getSchemaProvider(beanFactory.getBean(pl.schemaProviderBeanClass()))),
 				new ProviderHolder("isAutoSchema",
 						PulsarListener::isAutoSchema,
-						pl -> Schema::AUTO_CONSUME)
+						pl -> Schema::AUTO_CONSUME),
+				new ProviderHolder("primitiveTypeSchema",
+						pl -> pl.primitiveTypeSchema() != PrimitiveTypeSchema.BYTES,
+						pl -> () -> pl.primitiveTypeSchema().getSchema()
+				)
 		);
 	}
 
@@ -59,8 +63,9 @@ public class SchemaProviderFactory {
 				.filter(providerHolder -> providerHolder.isValid(annotation))
 				.collect(Collectors.toList());
 
+		//As per pulsar docs, if no schema is set, default is to use BYTES.
 		if (matchedHolders.size() == 0) {
-			return () -> annotation.primitiveTypeSchema().getSchema();
+			return PrimitiveTypeSchema.BYTES::getSchema;
 		}
 
 		if (matchedHolders.size() != 1) {

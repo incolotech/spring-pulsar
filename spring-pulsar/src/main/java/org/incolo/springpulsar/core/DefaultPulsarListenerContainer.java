@@ -5,23 +5,21 @@ import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.incolo.springpulsar.config.ConsumerFactory;
-import org.incolo.springpulsar.config.DefaultConsumerFactory;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
 import org.springframework.core.log.LogAccessor;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
-import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.concurrent.ListenableFuture;
 
-import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Charvak Patel
  */
 public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 
-	protected final LogAccessor logger = new LogAccessor(LogFactory.getLog(getClass()));
+	static final LogAccessor logger = new LogAccessor(LogFactory.getLog(DefaultPulsarListenerContainer.class));
 
 	private final PulsarListenerEndpoint<?> endpoint;
 	private final ConsumerFactory consumerFactory;
@@ -31,6 +29,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	private final Object lifecycleMonitor = new Object();
 
 	private final MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory;
+	private ListenableFuture<?> containerTaskFuture;
 
 
 	public DefaultPulsarListenerContainer(
@@ -50,7 +49,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			if (!isRunning()) {
 				try {
 					this.isRunning = true;
-					this.taskExecutor.submit(
+					this.containerTaskFuture = this.taskExecutor.submitListenable(
 							new ContainerTask(consumerFactory.createConsumer(endpoint),
 									messageProcessorFactory.createMessageProcessor(endpoint.getBean(), endpoint.getMethod())));
 				} catch (PulsarClientException e) {
@@ -63,10 +62,17 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	@Override
 	public void stop() {
 		synchronized (this.lifecycleMonitor) {
+			logger.info("Stopping container");
 			if (isRunning()) {
 				isRunning = false;
-				logger.info("Stopping the container");
+
 			}
+			try {
+				this.containerTaskFuture.get();
+			} catch (InterruptedException | ExecutionException e) {
+				logger.warn(e, "Exception while stopping consumer thread");
+			}
+			logger.info("Container is stopped");
 		}
 	}
 
@@ -81,33 +87,44 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	}
 
 
-	private final class ContainerTask implements Runnable {
+	private final class ContainerTask implements Callable<Object> {
 
 		private final Consumer<?> consumer;
 		private final MessageProcessor messageProcessor;
+		private final int receiveTimeoutMs = 2000;
 
 		public ContainerTask(Consumer<?> consumer, MessageProcessor messageProcessor) {
 			this.consumer = consumer;
 			this.messageProcessor = messageProcessor;
 		}
 
-
-		@Override
-		public void run() {
-			while (isRunning()) {
-				try {
-					processMessage();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+		private void close() throws PulsarClientException {
+			this.consumer.close();
+			logger.info("Consumer closed");
 		}
 
 		private void processMessage() throws Exception {
-			Message<?> pulsarMessage = consumer.receive();
+			Message<?> pulsarMessage = consumer.receive(receiveTimeoutMs, TimeUnit.MILLISECONDS);
 			this.messageProcessor.process(pulsarMessage, consumer);
 		}
 
-
+		@Override
+		public Object call() throws Exception {
+			while (isRunning()) {
+				try {
+					processMessage();
+				}
+				catch (Exception e) {
+					throw new SpringPulsarException(e);
+				}
+			}
+			logger.info("Inside the task");
+			try {
+				close();
+			} catch (PulsarClientException e) {
+				throw new SpringPulsarException(e);
+			}
+			return null;
+		}
 	}
 }
