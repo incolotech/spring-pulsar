@@ -21,7 +21,7 @@ public class DefaultMessageProcessorFactory implements MessageProcessorFactory<B
 		return new BaseMessageProcessor(this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method));
 	}
 
-	public MessageHandlerMethodFactory setUpMessageHandlerFactory(BeanFactory beanFactory) {
+	public static MessageHandlerMethodFactory setUpMessageHandlerFactory(BeanFactory beanFactory) {
 		DefaultMessageHandlerMethodFactory defaultFactory = new DefaultMessageHandlerMethodFactory();
 		defaultFactory.setBeanFactory(beanFactory);
 		DefaultConversionService defaultFormattingConversionService = new DefaultConversionService();
