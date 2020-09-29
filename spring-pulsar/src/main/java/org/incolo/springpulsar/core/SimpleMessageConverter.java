@@ -13,7 +13,7 @@ import java.lang.reflect.Type;
  */
 public class SimpleMessageConverter implements MessageConverter {
 	@Override
-	public Message<?> toMessage(org.apache.pulsar.client.api.Message<?> message, Acknowledgement acknowledgment, Consumer<?> consumer, Type inferredType) {
+	public Message<?> toMessage(org.apache.pulsar.client.api.Message<?> message, Acknowledgement acknowledgment, Consumer<?> consumer, Type inferredType) throws Exception {
 		return MessageBuilder.createMessage(message.getValue(), getMessageHeaders(message));
 	}
 }

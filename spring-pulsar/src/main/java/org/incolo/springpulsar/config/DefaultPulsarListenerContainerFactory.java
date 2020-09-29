@@ -34,7 +34,7 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 
 	@Override
 	public DefaultPulsarListenerContainer createListenerContainer(PulsarListenerEndpoint<?> endpoint) {
-		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, defaultMessageProcessorFactory, messageConverter);
+		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, defaultMessageProcessorFactory);
 	}
 
 	@Override
@@ -45,6 +45,6 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		executor = new SimpleAsyncTaskExecutor();
-		defaultMessageProcessorFactory = new DefaultMessageProcessorFactory(this.beanFactory);
+		defaultMessageProcessorFactory = new DefaultMessageProcessorFactory(this.beanFactory, this.messageConverter);
 	}
 }

@@ -2,9 +2,11 @@ package org.incolo.springpulsar.annotation;
 
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
-import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.SubscriptionType;
+import org.apache.pulsar.shade.org.apache.avro.data.Json;
+import org.incolo.springpulsar.annotation.sample.CustomData;
 import org.incolo.springpulsar.config.*;
+import org.incolo.springpulsar.core.JsonMessageConverter;
 import org.incolo.springpulsar.core.PrimitiveTypeSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,7 @@ public class Application {
 
 	@Test
 	public void init() throws InterruptedException {
-		Thread.sleep(10000);
+		Thread.sleep(100000);
 	}
 
 	@Autowired
@@ -46,17 +48,16 @@ public class Application {
 
 		@Bean
 		PulsarListenerContainerFactory<?> defaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
-			return new DefaultPulsarListenerContainerFactory(consumerFactory);
+			return new DefaultPulsarListenerContainerFactory(consumerFactory, new JsonMessageConverter());
 		}
 
 		@PulsarListener(
 				topics = "persistent://public/default/sample-test",
 				subscriptionName = "sample-test",
-				subscriptionType = SubscriptionType.Shared,
-				schemaProviderBeanClass = CustomSchemaProvider.class
+				subscriptionType = SubscriptionType.Shared
 		)
-		public void testing(String payload, Object payload1,Message<?> msg) {
-			System.out.println("Message : " + payload);
+		public void testing(CustomData payload, Message<?> msg) {
+			System.out.println("Message : " + payload.getField1());
 			System.out.println("Key : " + msg);
 		}
 	}

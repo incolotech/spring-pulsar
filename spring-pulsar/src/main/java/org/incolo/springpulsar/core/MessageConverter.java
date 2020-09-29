@@ -9,7 +9,15 @@ import java.util.HashMap;
 
 public interface MessageConverter {
 
-	Message<?> toMessage(org.apache.pulsar.client.api.Message<?> message, Acknowledgement acknowledgment, Consumer<?> consumer, Type inferredType);
+	/**
+	 * @param message Message to be converted.
+	 * @param acknowledgment interface to acknowledge the message. Might be useful to put in headers .Don't alter it unless you know what you are doing.
+	 * @param consumer belonging to the message
+	 * @param inferredType type of payload. If it is null then it means that target method is not asking for payload.
+	 * @return
+	 * @throws Exception
+	 */
+	Message<?> toMessage(org.apache.pulsar.client.api.Message<?> message, Acknowledgement acknowledgment, Consumer<?> consumer, Type inferredType) throws Exception;
 
 	default MessageHeaders getMessageHeaders(org.apache.pulsar.client.api.Message<?> msg) {
 		return new MessageHeaders(new HashMap<String, Object>() {{
