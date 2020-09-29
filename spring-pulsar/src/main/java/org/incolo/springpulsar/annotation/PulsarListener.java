@@ -6,6 +6,7 @@ import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.incolo.springpulsar.config.SchemaProvider;
+import org.incolo.springpulsar.core.Acknowledgement;
 import org.incolo.springpulsar.core.PrimitiveTypeSchema;
 
 import javax.validation.constraints.Null;
@@ -53,4 +54,10 @@ public @interface PulsarListener {
 	boolean isAutoSchema() default false;
 
 	Property[] properties() default {};
+
+	/**
+	 *	Specifies how to handle acknowledgements <br>
+	 *	This value is not used if the user has one argument {@link Acknowledgement}, in that case the mode automatically becomes manual.
+	 */
+	AutoAckMode autoAckMode() default AutoAckMode.DEFAULT;
 }

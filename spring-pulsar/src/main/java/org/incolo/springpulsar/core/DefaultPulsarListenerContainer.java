@@ -51,7 +51,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 					this.isRunning = true;
 					this.containerTaskFuture = this.taskExecutor.submitListenable(
 							new ContainerTask(consumerFactory.createConsumer(endpoint),
-									messageProcessorFactory.createMessageProcessor(endpoint.getBean(), endpoint.getMethod())));
+									messageProcessorFactory.createMessageProcessor(endpoint.getBean(), endpoint.getMethod(), endpoint.getAutoAckMode())));
 				} catch (PulsarClientException e) {
 					e.printStackTrace();
 				}
