@@ -4,6 +4,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.config.ConsumerFactory;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
 import org.springframework.core.log.LogAccessor;
@@ -29,6 +30,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 	private final Object lifecycleMonitor = new Object();
 
 	private final MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory;
+	private AutoAckMode autoAckMode;
 	private ListenableFuture<?> containerTaskFuture;
 
 
@@ -36,11 +38,13 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			PulsarListenerEndpoint<?> endpoint,
 			ConsumerFactory consumerFactory,
 			AsyncListenableTaskExecutor taskExecutor,
-			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
+			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory,
+			AutoAckMode autoAckMode) {
 		this.endpoint = endpoint;
 		this.consumerFactory = consumerFactory;
 		this.taskExecutor = taskExecutor;
 		this.messageProcessorFactory = messageProcessorFactory;
+		this.autoAckMode = autoAckMode;
 	}
 
 	@Override
@@ -51,7 +55,10 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 					this.isRunning = true;
 					this.containerTaskFuture = this.taskExecutor.submitListenable(
 							new ContainerTask(consumerFactory.createConsumer(endpoint),
-									messageProcessorFactory.createMessageProcessor(endpoint.getBean(), endpoint.getMethod(), endpoint.getAutoAckMode())));
+									messageProcessorFactory.createMessageProcessor(
+											endpoint.getBean(),
+											endpoint.getMethod(),
+											endpoint.getAutoAckMode() == AutoAckMode.DEFAULT ? autoAckMode : endpoint.getAutoAckMode())));
 				} catch (PulsarClientException e) {
 					e.printStackTrace();
 				}
@@ -105,7 +112,10 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 
 		private void processMessage() throws Exception {
 			Message<?> pulsarMessage = consumer.receive(receiveTimeoutMs, TimeUnit.MILLISECONDS);
-			this.messageProcessor.process(pulsarMessage, consumer);
+			if (pulsarMessage != null) {
+				this.messageProcessor.process(pulsarMessage, consumer);
+			}
+
 		}
 
 		@Override
@@ -113,8 +123,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			while (isRunning()) {
 				try {
 					processMessage();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					logger.error(new SpringPulsarException(e), "Error while processing message");
 				}
 			}

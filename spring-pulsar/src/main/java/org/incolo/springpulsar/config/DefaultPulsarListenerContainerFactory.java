@@ -1,5 +1,6 @@
 package org.incolo.springpulsar.config;
 
+import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.core.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -20,6 +21,7 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 	private BeanFactory beanFactory;
 	private MessageProcessorFactory<? extends MessageProcessor> defaultMessageProcessorFactory;
 	private final MessageConverter messageConverter;
+	private final AutoAckMode autoAckMode = AutoAckMode.AUTO_ACK_NACK;
 
 	public DefaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
 		this.consumerFactory = consumerFactory;
@@ -34,12 +36,16 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 
 	@Override
 	public DefaultPulsarListenerContainer createListenerContainer(PulsarListenerEndpoint<?> endpoint) {
-		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, defaultMessageProcessorFactory);
+		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, defaultMessageProcessorFactory, getAutoAckMode());
 	}
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 		this.beanFactory = beanFactory;
+	}
+
+	public AutoAckMode getAutoAckMode() {
+		return autoAckMode;
 	}
 
 	@Override
