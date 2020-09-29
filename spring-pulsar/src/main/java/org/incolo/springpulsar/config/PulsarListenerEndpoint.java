@@ -3,6 +3,7 @@ package org.incolo.springpulsar.config;
 import org.apache.pulsar.client.api.RegexSubscriptionMode;
 import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 import org.apache.pulsar.client.api.SubscriptionType;
+import org.incolo.springpulsar.annotation.AutoAckMode;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -38,4 +39,6 @@ public interface PulsarListenerEndpoint<V> {
     Object getBean();
 
 	SchemaProvider getSchemaProvider();
+
+	AutoAckMode getAutoAckMode();
 }

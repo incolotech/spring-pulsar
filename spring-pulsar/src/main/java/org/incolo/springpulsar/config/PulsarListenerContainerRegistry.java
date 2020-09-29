@@ -36,7 +36,7 @@ public class PulsarListenerContainerRegistry implements SmartLifecycle, BeanFact
 	@Override
 	public void stop() {
 		System.out.println("Stopping");
-		containers.forEachValue(0, container -> container.stop());
+		containers.forEachValue(0, Lifecycle::stop);
 		isRunning = false;
 	}
 

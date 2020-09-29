@@ -1,5 +1,6 @@
 package org.incolo.springpulsar.core;
 
+import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.converter.GenericMessageConverter;
@@ -24,10 +25,11 @@ public class DefaultMessageProcessorFactory implements MessageProcessorFactory<B
 	}
 
 	@Override
-	public BaseMessageProcessor createMessageProcessor(Object bean, Method method) {
+	public BaseMessageProcessor createMessageProcessor(Object bean, Method method, AutoAckMode autoAckMode) {
 		return new BaseMessageProcessor(
 				this.messageHandlerMethodFactory.createInvocableHandlerMethod(bean, method),
-				this.messageConverter
+				this.messageConverter,
+				autoAckMode
 		);
 	}
 

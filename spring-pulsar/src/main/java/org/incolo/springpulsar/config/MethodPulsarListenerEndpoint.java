@@ -3,6 +3,7 @@ package org.incolo.springpulsar.config;
 import org.apache.pulsar.client.api.RegexSubscriptionMode;
 import org.apache.pulsar.client.api.SubscriptionInitialPosition;
 import org.apache.pulsar.client.api.SubscriptionType;
+import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.annotation.Property;
 
 import java.lang.reflect.Method;
@@ -11,7 +12,7 @@ import java.util.Properties;
 /**
  * @author Charvak Patel
  */
-public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint{
+public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint<V>{
 
     private String id;
 
@@ -40,6 +41,8 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint{
     private Object bean;
 
     private SchemaProvider schemaProvider;
+
+    private AutoAckMode autoAckMode;
 
     @Override
     public String getId() {
@@ -165,5 +168,14 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint{
 
 	public void setSchemaProvider(SchemaProvider schemaProvider) {
 		this.schemaProvider = schemaProvider;
+	}
+
+	@Override
+	public AutoAckMode getAutoAckMode() {
+		return autoAckMode;
+	}
+
+	public void setAutoAckMode(AutoAckMode autoAckMode) {
+		this.autoAckMode = autoAckMode;
 	}
 }

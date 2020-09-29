@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class MessageProcessorUtils {
 
-	private static final List<Type> SPRING_PULSAR_TYPES = Arrays.asList(Message.class, Consumer.class);
+	private static final List<Type> SPRING_PULSAR_TYPES = Arrays.asList(Message.class, Consumer.class, Acknowledgement.class);
 
 	public static Optional<Class<?>> inferPayloadType(InvocableHandlerMethod invocableHandlerMethod) throws PayloadTypeInferenceException {
 		List<MethodParameter> parameters = Arrays.stream(invocableHandlerMethod.getMethodParameters())
@@ -45,6 +45,11 @@ public class MessageProcessorUtils {
 						l)
 		));
 		return Optional.ofNullable(ret).map(MethodParameter::getParameterType);
+	}
+
+	public static boolean isManualAck(InvocableHandlerMethod invocableHandlerMethod) {
+		return Arrays.stream(invocableHandlerMethod.getMethodParameters())
+				.anyMatch(param -> parameterIsType(param.getGenericParameterType(), Acknowledgement.class));
 	}
 
 	public static boolean parameterIsType(Type parameterType, Type type) {
