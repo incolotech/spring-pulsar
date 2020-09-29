@@ -10,8 +10,6 @@ public class CustomData extends GeneratedMessageV3 {
 	public CustomData() {
 	}
 
-
-
 	public String getF1() {
 		return f1;
 	}

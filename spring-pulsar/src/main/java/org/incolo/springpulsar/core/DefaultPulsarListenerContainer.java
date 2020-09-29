@@ -36,8 +36,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			PulsarListenerEndpoint<?> endpoint,
 			ConsumerFactory consumerFactory,
 			AsyncListenableTaskExecutor taskExecutor,
-			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory,
-			MessageConverter messageConverter) {
+			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
 		this.endpoint = endpoint;
 		this.consumerFactory = consumerFactory;
 		this.taskExecutor = taskExecutor;
@@ -116,7 +115,7 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 					processMessage();
 				}
 				catch (Exception e) {
-					throw new SpringPulsarException(e);
+					logger.error(new SpringPulsarException(e), "Error while processing message");
 				}
 			}
 			logger.info("Inside the task");
