@@ -7,5 +7,6 @@ import org.springframework.context.SmartLifecycle;
  * @author Charvak Patel
  */
 public interface PulsarListenerContainer extends SmartLifecycle {
-	PulsarListenerEndpoint<?> getEndpoint();
+	ContainerConfiguration getContainerConfiguration();
+	PulsarListenerEndpoint<?> getPulsarListenerEndpoint();
 }

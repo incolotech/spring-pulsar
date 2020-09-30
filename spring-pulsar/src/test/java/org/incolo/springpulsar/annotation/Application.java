@@ -3,11 +3,9 @@ package org.incolo.springpulsar.annotation;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.SubscriptionType;
-import org.apache.pulsar.shade.org.apache.avro.data.Json;
 import org.incolo.springpulsar.annotation.sample.CustomData;
 import org.incolo.springpulsar.config.*;
 import org.incolo.springpulsar.core.JsonMessageConverter;
-import org.incolo.springpulsar.core.PrimitiveTypeSchema;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +46,7 @@ public class Application {
 
 		@Bean
 		PulsarListenerContainerFactory<?> defaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
-			return new DefaultPulsarListenerContainerFactory(consumerFactory, new JsonMessageConverter());
+			return new SimplePulsarListenerContainerFactory(consumerFactory, new JsonMessageConverter());
 		}
 
 		@PulsarListener(

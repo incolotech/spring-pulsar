@@ -6,37 +6,34 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.messaging.converter.GenericMessageConverter;
-import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 
 /**
  * @author Charvak Patel
  */
-public class DefaultPulsarListenerContainerFactory implements PulsarListenerContainerFactory<DefaultPulsarListenerContainer>, BeanFactoryAware, InitializingBean {
+public class SimplePulsarListenerContainerFactory implements PulsarListenerContainerFactory<SimplePulsarListenerContainer>, BeanFactoryAware, InitializingBean {
 
 	private final ConsumerFactory consumerFactory;
 	private SimpleAsyncTaskExecutor executor;
 	private BeanFactory beanFactory;
 	private MessageProcessorFactory<? extends MessageProcessor> defaultMessageProcessorFactory;
 	private final MessageConverter messageConverter;
-	private final AutoAckMode autoAckMode = AutoAckMode.AUTO_ACK_NACK;
+	private AutoAckMode autoAckMode = AutoAckMode.AUTO_ACK_NACK;
 
-	public DefaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
+	public SimplePulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
 		this.consumerFactory = consumerFactory;
 		this.messageConverter = new SimpleMessageConverter();
 	}
 
-	public DefaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory, MessageConverter messageConverter) {
+	public SimplePulsarListenerContainerFactory(ConsumerFactory consumerFactory, MessageConverter messageConverter) {
 		this.consumerFactory = consumerFactory;
 		this.messageConverter = messageConverter;
 	}
 
 
 	@Override
-	public DefaultPulsarListenerContainer createListenerContainer(PulsarListenerEndpoint<?> endpoint) {
-		return new DefaultPulsarListenerContainer(endpoint, consumerFactory, executor, defaultMessageProcessorFactory, getAutoAckMode());
+	public SimplePulsarListenerContainer createListenerContainer(PulsarListenerEndpoint<?> endpoint) {
+		return new SimplePulsarListenerContainer(new ContainerConfiguration(endpoint), consumerFactory, executor, defaultMessageProcessorFactory);
 	}
 
 	@Override
@@ -44,13 +41,22 @@ public class DefaultPulsarListenerContainerFactory implements PulsarListenerCont
 		this.beanFactory = beanFactory;
 	}
 
+	public void setAutoAckMode(AutoAckMode autoAckMode) {
+		this.autoAckMode = autoAckMode;
+	}
+
 	public AutoAckMode getAutoAckMode() {
 		return autoAckMode;
+	}
+
+	private ContainerConfiguration getContainerConfiguration(PulsarListenerEndpoint<?> endpoint) {
+		return new ContainerConfiguration(endpoint)
+				.setAutoAckMode(autoAckMode);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		executor = new SimpleAsyncTaskExecutor();
-		defaultMessageProcessorFactory = new DefaultMessageProcessorFactory(this.beanFactory, this.messageConverter);
+		defaultMessageProcessorFactory = new SimpleMessageProcessorFactory(this.beanFactory, this.messageConverter);
 	}
 }

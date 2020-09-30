@@ -44,6 +44,8 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint<V
 
     private AutoAckMode autoAckMode;
 
+    private int concurrency;
+
     @Override
     public String getId() {
         return id;
@@ -177,5 +179,14 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint<V
 
 	public void setAutoAckMode(AutoAckMode autoAckMode) {
 		this.autoAckMode = autoAckMode;
+	}
+
+	@Override
+	public int getConcurrency() {
+		return concurrency;
+	}
+
+	public void setConcurrency(int concurrency) {
+		this.concurrency = concurrency;
 	}
 }

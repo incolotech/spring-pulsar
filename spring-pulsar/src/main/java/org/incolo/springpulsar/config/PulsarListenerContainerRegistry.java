@@ -42,7 +42,7 @@ public class PulsarListenerContainerRegistry implements SmartLifecycle, BeanFact
 
 	public void registerContainer(PulsarListenerEndpoint<?> endpoint) {
 		PulsarListenerContainer container = resolveFactory(endpoint).createListenerContainer(endpoint);
-		String id = container.getEndpoint().getId();
+		String id = container.getPulsarListenerEndpoint().getId();
 		synchronized (this.containers) {
 			Assert.state(!this.containers.containsKey(id),
 					"Another endpoint is already registered with id '" + id + "'");
