@@ -24,7 +24,7 @@ class MessageProcessorUtilsTest {
 
 	@BeforeAll
 	public static void setUp() {
-		handlerMethodFactory = DefaultMessageProcessorFactory.setUpMessageHandlerFactory(null);
+		handlerMethodFactory = SimpleMessageProcessorFactory.setUpMessageHandlerFactory(null);
 		methods = Arrays.stream(TypeInferenceSample.class.getDeclaredMethods())
 				.collect(Collectors.toMap(Method::getName, Function.identity()));
 	}

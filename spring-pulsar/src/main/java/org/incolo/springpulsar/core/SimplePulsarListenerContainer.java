@@ -4,7 +4,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
-import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.config.ConsumerFactory;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
 import org.springframework.core.log.LogAccessor;
@@ -18,34 +17,23 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author Charvak Patel
  */
-public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
+public class SimplePulsarListenerContainer extends AbstractPulsarListenerContainer {
 
-	static final LogAccessor logger = new LogAccessor(LogFactory.getLog(DefaultPulsarListenerContainer.class));
+	static final LogAccessor logger = new LogAccessor(LogFactory.getLog(SimplePulsarListenerContainer.class));
 
-	private final PulsarListenerEndpoint<?> endpoint;
-	private final ConsumerFactory consumerFactory;
-	private final AsyncListenableTaskExecutor taskExecutor;
-
-	private volatile boolean isRunning = false;
-	private final Object lifecycleMonitor = new Object();
-
-	private final MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory;
-	private AutoAckMode autoAckMode;
 	private ListenableFuture<?> containerTaskFuture;
 
-
-	public DefaultPulsarListenerContainer(
-			PulsarListenerEndpoint<?> endpoint,
-			ConsumerFactory consumerFactory,
-			AsyncListenableTaskExecutor taskExecutor,
-			MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory,
-			AutoAckMode autoAckMode) {
-		this.endpoint = endpoint;
-		this.consumerFactory = consumerFactory;
-		this.taskExecutor = taskExecutor;
-		this.messageProcessorFactory = messageProcessorFactory;
-		this.autoAckMode = autoAckMode;
+	public SimplePulsarListenerContainer(ContainerConfiguration containerConfiguration,
+											ConsumerFactory consumerFactory,
+											AsyncListenableTaskExecutor taskExecutor,
+											MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
+		super(containerConfiguration, consumerFactory, taskExecutor, messageProcessorFactory);
 	}
+
+	PulsarListenerEndpoint<?> getEndpoint() {
+		return containerConfiguration.getEndpoint();
+	}
+
 
 	@Override
 	public void start() {
@@ -54,11 +42,11 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 				try {
 					this.isRunning = true;
 					this.containerTaskFuture = this.taskExecutor.submitListenable(
-							new ContainerTask(consumerFactory.createConsumer(endpoint),
+							new ContainerTask(consumerFactory.createConsumer(getEndpoint()),
 									messageProcessorFactory.createMessageProcessor(
-											endpoint.getBean(),
-											endpoint.getMethod(),
-											endpoint.getAutoAckMode() == AutoAckMode.DEFAULT ? autoAckMode : endpoint.getAutoAckMode())));
+											getEndpoint().getBean(),
+											getEndpoint().getMethod(),
+											getEndpoint().getAutoAckMode())));
 				} catch (PulsarClientException e) {
 					e.printStackTrace();
 				}
@@ -81,16 +69,6 @@ public class DefaultPulsarListenerContainer implements PulsarListenerContainer {
 			}
 			logger.info("Container is stopped");
 		}
-	}
-
-	@Override
-	public boolean isRunning() {
-		return this.isRunning;
-	}
-
-	@Override
-	public PulsarListenerEndpoint<?> getEndpoint() {
-		return endpoint;
 	}
 
 

@@ -41,4 +41,6 @@ public interface PulsarListenerEndpoint<V> {
 	SchemaProvider getSchemaProvider();
 
 	AutoAckMode getAutoAckMode();
+
+	int getConcurrency();
 }

@@ -9,17 +9,17 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 
 import java.lang.reflect.Method;
 
-public class DefaultMessageProcessorFactory implements MessageProcessorFactory<BaseMessageProcessor> {
+public class SimpleMessageProcessorFactory implements MessageProcessorFactory<BaseMessageProcessor> {
 
 	private final MessageHandlerMethodFactory messageHandlerMethodFactory;
 	private final MessageConverter messageConverter;
 
-	public DefaultMessageProcessorFactory(BeanFactory beanFactory) {
+	public SimpleMessageProcessorFactory(BeanFactory beanFactory) {
 		this.messageHandlerMethodFactory = setUpMessageHandlerFactory(beanFactory);
 		this.messageConverter = new SimpleMessageConverter();
 	}
 
-	public DefaultMessageProcessorFactory(BeanFactory beanFactory, MessageConverter messageConverter) {
+	public SimpleMessageProcessorFactory(BeanFactory beanFactory, MessageConverter messageConverter) {
 		this.messageHandlerMethodFactory = setUpMessageHandlerFactory(beanFactory);
 		this.messageConverter = messageConverter;
 	}
