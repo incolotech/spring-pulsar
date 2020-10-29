@@ -4,8 +4,8 @@ import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
 
 public class ContainerConfiguration {
-	PulsarListenerEndpoint<?> endpoint;
-	AutoAckMode autoAckMode;
+	private PulsarListenerEndpoint<?> endpoint;
+	private AutoAckMode autoAckMode;
 
 	public ContainerConfiguration(PulsarListenerEndpoint<?> endpoint) {
 		this.endpoint = endpoint;

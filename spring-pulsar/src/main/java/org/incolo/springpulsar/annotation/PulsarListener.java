@@ -60,4 +60,6 @@ public @interface PulsarListener {
 	 *	This value is not used if the user has one argument {@link Acknowledgement}, in that case the mode automatically becomes manual.
 	 */
 	AutoAckMode autoAckMode() default AutoAckMode.DEFAULT;
+
+	int concurrency() default 1;
 }

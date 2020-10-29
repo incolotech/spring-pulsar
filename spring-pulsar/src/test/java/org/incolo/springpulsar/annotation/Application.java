@@ -21,7 +21,7 @@ public class Application {
 
 	@Test
 	public void init() throws InterruptedException {
-		Thread.sleep(100000);
+		Thread.sleep(10000);
 	}
 
 	@Autowired
@@ -46,17 +46,20 @@ public class Application {
 
 		@Bean
 		PulsarListenerContainerFactory<?> defaultPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
-			return new SimplePulsarListenerContainerFactory(consumerFactory, new JsonMessageConverter());
+			return new ConcurrentPulsarListenerContainerFactory(consumerFactory);
 		}
 
 		@PulsarListener(
 				topics = "persistent://public/default/sample-test",
 				subscriptionName = "sample-test",
-				subscriptionType = SubscriptionType.Shared
+				subscriptionType = SubscriptionType.Shared,
+				concurrency = 3,
+				jsonSchema = CustomData.class
+
 		)
 		public void testing(CustomData payload, Message<?> msg) {
 			System.out.println("Message : " + payload.getField1());
-			System.out.println("Key : " + msg);
+			System.out.println("Key : " + new String(msg.getData()));
 		}
 	}
 }

@@ -35,39 +35,24 @@ public class SimplePulsarListenerContainer extends AbstractPulsarListenerContain
 	}
 
 
-	@Override
-	public void start() {
-		synchronized (this.lifecycleMonitor) {
-			if (!isRunning()) {
-				try {
-					this.isRunning = true;
-					this.containerTaskFuture = this.taskExecutor.submitListenable(
-							new ContainerTask(consumerFactory.createConsumer(getEndpoint()),
-									messageProcessorFactory.createMessageProcessor(
-											getEndpoint().getBean(),
-											getEndpoint().getMethod(),
-											getEndpoint().getAutoAckMode())));
-				} catch (PulsarClientException e) {
-					e.printStackTrace();
-				}
-			}
+	protected void doStart() throws SpringPulsarException {
+		try {
+			this.containerTaskFuture = this.taskExecutor.submitListenable(
+					new ContainerTask(consumerFactory.createConsumer(getEndpoint()),
+							messageProcessorFactory.createMessageProcessor(
+									getEndpoint().getBean(),
+									getEndpoint().getMethod(),
+									getEndpoint().getAutoAckMode())));
+		} catch (PulsarClientException e) {
+			throw new SpringPulsarException(e);
 		}
 	}
 
-	@Override
-	public void stop() {
-		synchronized (this.lifecycleMonitor) {
-			logger.info("Stopping container");
-			if (isRunning()) {
-				isRunning = false;
-
-			}
-			try {
-				this.containerTaskFuture.get();
-			} catch (InterruptedException | ExecutionException e) {
-				logger.warn(e, "Exception while stopping consumer thread");
-			}
-			logger.info("Container is stopped");
+	protected void doStop() {
+		try {
+			this.containerTaskFuture.get();
+		} catch (InterruptedException | ExecutionException e) {
+			throw new SpringPulsarException(e);
 		}
 	}
 
