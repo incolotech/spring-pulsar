@@ -50,6 +50,7 @@ public class PulsarAnnotationTransformer {
 		endpoint.setSubscriptionInitialPosition(annotation.subscriptionInitialPosition());
 		endpoint.setSchemaProvider(schemaProviderFactory.getSchemaProvider(annotation));
 		endpoint.setAutoAckMode(annotation.autoAckMode());
+		endpoint.setConcurrency(annotation.concurrency());
 
 		Properties properties = new Properties();
 		properties.putAll(Stream.of(annotation.properties())
