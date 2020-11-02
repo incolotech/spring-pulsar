@@ -43,4 +43,6 @@ public interface PulsarListenerEndpoint<V> {
 	AutoAckMode getAutoAckMode();
 
 	int getConcurrency();
+
+	int getPriorityLevel();
 }

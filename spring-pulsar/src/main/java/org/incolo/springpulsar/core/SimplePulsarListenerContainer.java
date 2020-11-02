@@ -4,6 +4,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.pulsar.client.api.Consumer;
 import org.apache.pulsar.client.api.Message;
 import org.apache.pulsar.client.api.PulsarClientException;
+import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.config.ConsumerFactory;
 import org.incolo.springpulsar.config.PulsarListenerEndpoint;
 import org.springframework.core.log.LogAccessor;
@@ -24,9 +25,9 @@ public class SimplePulsarListenerContainer extends AbstractPulsarListenerContain
 	private ListenableFuture<?> containerTaskFuture;
 
 	public SimplePulsarListenerContainer(ContainerConfiguration containerConfiguration,
-											ConsumerFactory consumerFactory,
-											AsyncListenableTaskExecutor taskExecutor,
-											MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
+										 ConsumerFactory consumerFactory,
+										 AsyncListenableTaskExecutor taskExecutor,
+										 MessageProcessorFactory<? extends MessageProcessor> messageProcessorFactory) {
 		super(containerConfiguration, consumerFactory, taskExecutor, messageProcessorFactory);
 	}
 
@@ -38,11 +39,13 @@ public class SimplePulsarListenerContainer extends AbstractPulsarListenerContain
 	protected void doStart() throws SpringPulsarException {
 		try {
 			this.containerTaskFuture = this.taskExecutor.submitListenable(
-					new ContainerTask(consumerFactory.createConsumer(getEndpoint()),
+					new ContainerTask(consumerFactory.createConsumer(containerConfiguration),
 							messageProcessorFactory.createMessageProcessor(
 									getEndpoint().getBean(),
 									getEndpoint().getMethod(),
-									getEndpoint().getAutoAckMode())));
+									getEndpoint().getAutoAckMode() == AutoAckMode.DEFAULT ?
+											containerConfiguration.getContainerProperties().getAutoAckMode() :
+											getEndpoint().getAutoAckMode())));
 		} catch (PulsarClientException e) {
 			throw new SpringPulsarException(e);
 		}

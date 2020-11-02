@@ -53,6 +53,8 @@ public @interface PulsarListener {
 
 	boolean isAutoSchema() default false;
 
+	int priorityLevel() default 0;
+
 	Property[] properties() default {};
 
 	/**
