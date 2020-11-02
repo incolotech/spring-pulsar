@@ -1,5 +1,6 @@
 package org.incolo.springpulsar.config;
 
+import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.incolo.springpulsar.annotation.AutoAckMode;
 import org.incolo.springpulsar.core.*;
@@ -19,15 +20,23 @@ public class ConcurrentPulsarListenerContainerFactory implements PulsarListenerC
 	private BeanFactory beanFactory;
 	private MessageProcessorFactory<? extends MessageProcessor> defaultMessageProcessorFactory;
 	private final MessageConverter messageConverter;
-	private AutoAckMode autoAckMode = AutoAckMode.AUTO_ACK_NACK;
+	private ContainerProperties containerProperties;
 
-	public ConcurrentPulsarListenerContainerFactory(ConsumerFactory consumerFactory) {
-		this.consumerFactory = consumerFactory;
+	public ConcurrentPulsarListenerContainerFactory(ClientFactory clientFactory, ContainerProperties containerProperties) throws PulsarClientException {
+		this.consumerFactory = new DefaultConsumerFactory(clientFactory);
+		this.containerProperties = containerProperties;
 		this.messageConverter = new SimpleMessageConverter();
 	}
 
-	public ConcurrentPulsarListenerContainerFactory(ConsumerFactory consumerFactory, MessageConverter messageConverter) {
+	public ConcurrentPulsarListenerContainerFactory(ConsumerFactory consumerFactory, ContainerProperties containerProperties) {
 		this.consumerFactory = consumerFactory;
+		this.containerProperties = containerProperties;
+		this.messageConverter = new SimpleMessageConverter();
+	}
+
+	public ConcurrentPulsarListenerContainerFactory(ConsumerFactory consumerFactory, ContainerProperties containerProperties, MessageConverter messageConverter) {
+		this.consumerFactory = consumerFactory;
+		this.containerProperties = containerProperties;
 		this.messageConverter = messageConverter;
 	}
 
@@ -48,17 +57,8 @@ public class ConcurrentPulsarListenerContainerFactory implements PulsarListenerC
 		this.beanFactory = beanFactory;
 	}
 
-	public void setAutoAckMode(AutoAckMode autoAckMode) {
-		this.autoAckMode = autoAckMode;
-	}
-
-	public AutoAckMode getAutoAckMode() {
-		return autoAckMode;
-	}
-
 	private ContainerConfiguration getContainerConfiguration(PulsarListenerEndpoint<?> endpoint) {
-		return new ContainerConfiguration(endpoint)
-				.setAutoAckMode(autoAckMode);
+		return new ContainerConfiguration(endpoint, containerProperties);
 	}
 
 	@Override
@@ -66,4 +66,6 @@ public class ConcurrentPulsarListenerContainerFactory implements PulsarListenerC
 		executor = new SimpleAsyncTaskExecutor();
 		defaultMessageProcessorFactory = new SimpleMessageProcessorFactory(this.beanFactory, this.messageConverter);
 	}
+
+
 }

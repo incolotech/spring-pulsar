@@ -33,9 +33,6 @@ class PulsarAnnotationParserTest {
         PulsarAnnotationParser sut = new PulsarAnnotationParser();
         assertEquals(2, sut.findMethodLevelAnnotations(MethodLevelKafkaListenerClass.class).size());
         assertTrue(sut.findMethodLevelHandlerAnnotations(MethodLevelKafkaListenerClass.class).isEmpty());
-
-        PulsarClient client = PulsarClient.builder().build();
-        client.newConsumer().topic("").subscribe();
     }
 
 }

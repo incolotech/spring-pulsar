@@ -46,6 +46,8 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint<V
 
     private int concurrency;
 
+    private int priorityLevel;
+
     @Override
     public String getId() {
         return id;
@@ -188,5 +190,14 @@ public class MethodPulsarListenerEndpoint<V> implements PulsarListenerEndpoint<V
 
 	public void setConcurrency(int concurrency) {
 		this.concurrency = concurrency;
+	}
+
+	@Override
+	public int getPriorityLevel() {
+		return priorityLevel;
+	}
+
+	public void setPriorityLevel(int priorityLevel) {
+		this.priorityLevel = priorityLevel;
 	}
 }

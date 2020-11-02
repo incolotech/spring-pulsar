@@ -1,5 +1,6 @@
 package org.incolo.springpulsar.core;
 
+import org.apache.pulsar.shade.org.apache.commons.lang3.ObjectUtils;
 import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 import org.incolo.springpulsar.annotation.Property;
 import org.incolo.springpulsar.annotation.PulsarListener;
@@ -40,17 +41,18 @@ public class PulsarAnnotationTransformer {
 		endpoint.setBeanName(beanName);
 
 		endpoint.setId(StringUtils.isBlank(annotation.id()) ? ID_PREFIX + counter.incrementAndGet() : annotation.id());
-		endpoint.setConsumerName(annotation.consumerName());
-		endpoint.setContainerFactory(annotation.containerFactory());
+		endpoint.setConsumerName(StringUtils.defaultIfBlank(annotation.consumerName(), null));
+		endpoint.setContainerFactory(StringUtils.defaultIfBlank(annotation.containerFactory(), null));
 		endpoint.setTopics(annotation.topics());
-		endpoint.setTopicPattern(annotation.topicPattern());
+		endpoint.setTopicPattern(StringUtils.defaultIfBlank(annotation.topicPattern(), null));
 		endpoint.setRegexSubscriptionMode(annotation.regexSubscriptionMode());
-		endpoint.setSubscriptionName(annotation.subscriptionName());
+		endpoint.setSubscriptionName(StringUtils.defaultIfBlank(annotation.subscriptionName(), null));
 		endpoint.setSubscriptionType(annotation.subscriptionType());
 		endpoint.setSubscriptionInitialPosition(annotation.subscriptionInitialPosition());
 		endpoint.setSchemaProvider(schemaProviderFactory.getSchemaProvider(annotation));
 		endpoint.setAutoAckMode(annotation.autoAckMode());
 		endpoint.setConcurrency(annotation.concurrency());
+		endpoint.setPriorityLevel(annotation.priorityLevel());
 
 		Properties properties = new Properties();
 		properties.putAll(Stream.of(annotation.properties())
