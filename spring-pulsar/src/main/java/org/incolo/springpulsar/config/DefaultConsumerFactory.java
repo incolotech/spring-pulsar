@@ -4,15 +4,13 @@ import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.shade.org.apache.commons.lang3.ArrayUtils;
 import org.incolo.springpulsar.core.ContainerConfiguration;
 import org.incolo.springpulsar.core.ContainerProperties;
+import org.incolo.springpulsar.util.PropertyUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.incolo.springpulsar.util.PropertyUtils.*;
 
 public class DefaultConsumerFactory implements ConsumerFactory {
 
@@ -43,22 +41,20 @@ public class DefaultConsumerFactory implements ConsumerFactory {
 		builder.subscriptionInitialPosition(endpoint.getSubscriptionInitialPosition());
 		builder.priorityLevel(endpoint.getPriorityLevel());
 
-		executeIfNonNull(properties.getAckTimeout(), builder::ackTimeout);
-		executeIfNonNull(properties.getAckTimeoutTickTime(), builder::ackTimeoutTickTime);
-		executeIfNonNull(properties.getNegativeAckRedeliveryDelay(), builder::negativeAckRedeliveryDelay);
+		executeIfNonNullLong(properties.getAckTimeout(), builder::ackTimeout);
+		executeIfNonNullLong(properties.getAckTimeoutTickTime(), builder::ackTimeoutTickTime);
+		executeIfNonNullLong(properties.getNegativeAckRedeliveryDelay(), builder::negativeAckRedeliveryDelay);
 		executeIfNonNull(properties.getMessageListener(), m -> builder.messageListener((MessageListener) m));
 		executeIfNonNull(properties.getCryptoKeyReader(), builder::cryptoKeyReader);
 		executeIfNonNull(properties.getMessageCrypto(), builder::messageCrypto);
 		executeIfNonNull(properties.getConsumerCryptoFailureAction(), builder::cryptoFailureAction);
 		executeIfNonNull(properties.getReceiverQueueSize(), builder::receiverQueueSize);
-		executeIfNonNull(properties.getAcknowledgmentGroupTime(), builder::acknowledgmentGroupTime);
+		executeIfNonNullLong(properties.getAcknowledgmentGroupTime(), builder::acknowledgmentGroupTime);
 		executeIfNonNull(properties.getReplicateSubscriptionState(), builder::replicateSubscriptionState);
 		executeIfNonNull(properties.getMaxTotalReceiverQueueSizeAcrossPartitions(), builder::maxTotalReceiverQueueSizeAcrossPartitions);
 		executeIfNonNull(properties.getConsumerEventListener(), builder::consumerEventListener);
 		executeIfNonNull(properties.getReadCompacted(), builder::readCompacted);
-		executeIfNonNull(
-				properties.getPatternAutoDiscoveryPeriod(),
-				(d, timeUnit) -> builder.patternAutoDiscoveryPeriod(Math.toIntExact(d), timeUnit));
+		executeIfNonNullInt(properties.getPatternAutoDiscoveryPeriod(), builder::patternAutoDiscoveryPeriod);
 
 
 		if (!CollectionUtils.isEmpty(properties.getInterceptors())) {
@@ -76,7 +72,7 @@ public class DefaultConsumerFactory implements ConsumerFactory {
 		executeIfNonNull(properties.getRetryEnable(), builder::enableRetry);
 		executeIfNonNull(properties.getMaxPendingChuckedMessage(), builder::maxPendingChuckedMessage);
 		executeIfNonNull(properties.getAutoAckOldestChunkedMessageOnQueueFull(), builder::autoAckOldestChunkedMessageOnQueueFull);
-		executeIfNonNull(properties.getExpireTimeOfIncompleteChunkedMessage(), builder::expireTimeOfIncompleteChunkedMessage);
+		executeIfNonNullLong(properties.getExpireTimeOfIncompleteChunkedMessage(), builder::expireTimeOfIncompleteChunkedMessage);
 
 
 		if (!endpoint.getProperties().isEmpty()) {
@@ -89,15 +85,4 @@ public class DefaultConsumerFactory implements ConsumerFactory {
 		return builder.subscribe();
 	}
 
-	private static void executeIfNonNull(Duration duration, BiConsumer<Long, TimeUnit> consumer) {
-		Optional.ofNullable(duration).ifPresent(
-				d -> consumer.accept(duration.toNanos(), TimeUnit.NANOSECONDS)
-		);
-	}
-
-	private static <T> void executeIfNonNull(T prop, java.util.function.Consumer<T> consumer) {
-		Optional.ofNullable(prop).ifPresent(
-				p -> consumer.accept(prop)
-		);
-	}
 }
