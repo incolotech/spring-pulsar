@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Charvak Patel
  */
 public class ContainerProperties {
-	private AutoAckMode autoAckMode;
+	private final AutoAckMode autoAckMode = AutoAckMode.AUTO_ACK_NACK;
 	private Duration ackTimeout;
 	private Duration ackTimeoutTickTime;
 	private Duration negativeAckRedeliveryDelay;
@@ -39,11 +39,6 @@ public class ContainerProperties {
 
 	public AutoAckMode getAutoAckMode() {
 		return autoAckMode;
-	}
-
-	public ContainerProperties setAutoAckMode(AutoAckMode autoAckMode) {
-		this.autoAckMode = autoAckMode;
-		return this;
 	}
 
 	public Duration getAckTimeout() {

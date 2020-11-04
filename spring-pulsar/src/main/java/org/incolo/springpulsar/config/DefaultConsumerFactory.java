@@ -4,7 +4,6 @@ import org.apache.pulsar.client.api.*;
 import org.apache.pulsar.shade.org.apache.commons.lang3.ArrayUtils;
 import org.incolo.springpulsar.core.ContainerConfiguration;
 import org.incolo.springpulsar.core.ContainerProperties;
-import org.incolo.springpulsar.util.PropertyUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Arrays;
@@ -16,8 +15,8 @@ public class DefaultConsumerFactory implements ConsumerFactory {
 
 	private final PulsarClient client;
 
-	public DefaultConsumerFactory(ClientFactory clientFactory) throws PulsarClientException {
-		this(clientFactory.createClient());
+	public DefaultConsumerFactory(PulsarClientFactory pulsarClientFactory) throws PulsarClientException {
+		this(pulsarClientFactory.createClient());
 	}
 
 	public DefaultConsumerFactory(PulsarClient client) {

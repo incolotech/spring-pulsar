@@ -18,7 +18,7 @@ public class PulsarListenerContainerRegistry implements SmartLifecycle, BeanFact
 
 	public static final String PULSAR_LISTENER_CONTAINER_REGISTRY_BEAN_NAME = "org.incolo.springpulsar.annotation.DefaultPulsarListenerContainerRegistry";
 
-	public static final String DEFAULT_CONTAINER_FACTORY_BEAN_NAME = "defaultPulsarListenerContainerFactory";
+	public static final String DEFAULT_CONTAINER_FACTORY_BEAN_NAME = "pulsarListenerContainerFactory";
 
 	private final ConcurrentHashMap<String, PulsarListenerContainer> containers = new ConcurrentHashMap<>();
 

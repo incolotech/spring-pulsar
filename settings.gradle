@@ -9,4 +9,4 @@ pluginManagement {
 rootProject.name = 'spring-pulsar'
 
 include 'spring-pulsar'
-include 'spring-pulsar-test'
+include 'spring-pulsar-boot'
