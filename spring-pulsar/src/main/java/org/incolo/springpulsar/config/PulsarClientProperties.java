@@ -324,7 +324,4 @@ public class PulsarClientProperties {
 		this.serviceUrl = serviceUrl;
 	}
 
-	public PulsarClientProperties(String serviceUrl) {
-		this.serviceUrl = serviceUrl;
-	}
 }

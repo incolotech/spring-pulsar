@@ -2,6 +2,7 @@ buildscript {
 	ext.kotlinVersion = '1.3.61'
 	repositories {
 		maven { url 'https://repo.spring.io/plugins-release' }
+
 	}
 	dependencies {
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
@@ -21,6 +22,7 @@ plugins {
 	id 'org.asciidoctor.jvm.pdf' version '3.1.0'
 	id 'org.asciidoctor.jvm.gems' version '3.1.0'
 	id 'org.asciidoctor.jvm.convert' version '3.1.0'
+	id 'org.springframework.boot' version '2.3.3.RELEASE'
 }
 
 apply plugin: 'io.spring.nohttp'
@@ -77,6 +79,8 @@ allprojects {
 
 	apply plugin: 'io.spring.dependency-management'
 
+
+
 	dependencyManagement {
 		resolutionStrategy {
 			cacheChangingModulesFor 0, 'seconds'
@@ -100,7 +104,7 @@ allprojects {
 		if (version.endsWith('BUILD-SNAPSHOT')) {
 			maven { url 'https://repo.spring.io/libs-snapshot' }
 		}
-//		maven { url 'https://repository.apache.org/content/groups/staging/' }
+		mavenCentral()
 	}
 
 }
@@ -114,6 +118,7 @@ subprojects { subproject ->
 	apply plugin: 'jacoco'
 	apply plugin: 'kotlin'
 	apply plugin: 'kotlin-spring'
+	apply plugin: 'org.springframework.boot'
 
 	java {
 		withJavadocJar()
@@ -141,6 +146,13 @@ subprojects { subproject ->
 
 	jacoco {
 		toolVersion = '0.8.5'
+	}
+
+	jar {
+		enabled = true
+	}
+	bootJar {
+		enabled = false
 	}
 
 	// dependencies that are common across all java projects
@@ -239,6 +251,7 @@ project ('spring-pulsar') {
 			exclude group: 'org.springframework'
 		}
 
+
 		api "org.apache.pulsar:pulsar-client:$pulsarVersion"
 
 		optionalApi 'com.fasterxml.jackson.core:jackson-core'
@@ -253,29 +266,25 @@ project ('spring-pulsar') {
 		optionalApi 'io.projectreactor:reactor-core'
 		optionalApi "io.micrometer:micrometer-core:$micrometerVersion"
 
-		testImplementation project (':spring-pulsar-test')
+		testImplementation 'org.junit.jupiter:junit-jupiter-api'
+		testImplementation 'org.springframework:spring-test'
 		testImplementation 'io.projectreactor:reactor-test'
+		testImplementation "org.hamcrest:hamcrest-core:$hamcrestVersion"
+		testImplementation "org.mockito:mockito-core:$mockitoVersion"
+		testImplementation ("junit:junit:$junit4Version") {
+			exclude group: 'org.hamcrest', module: 'hamcrest-core'
+		}
 		testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
 		testImplementation "org.hibernate.validator:hibernate-validator:$hibernateValidationVersion"
 	}
 }
 
-project ('spring-pulsar-test') {
-	description = 'Spring Pulsar Test'
+project ('spring-pulsar-boot') {
+	description = 'Spring Pulsar'
 
 	dependencies {
-		api 'org.springframework:spring-context'
-		api 'org.springframework:spring-test'
-		api ("org.springframework.retry:spring-retry:$springRetryVersion") {
-			exclude group: 'org.springframework'
-		}
-		api 'org.junit.jupiter:junit-jupiter-api'
-		optionalApi "org.hamcrest:hamcrest-core:$hamcrestVersion"
-		optionalApi "org.mockito:mockito-core:$mockitoVersion"
-		optionalApi ("junit:junit:$junit4Version") {
-			exclude group: 'org.hamcrest', module: 'hamcrest-core'
-		}
-		optionalApi "org.apache.logging.log4j:log4j-core:$log4jVersion"
+		implementation project(':spring-pulsar')
+		implementation 'org.springframework.boot:spring-boot-starter'
 	}
 }
 
@@ -287,87 +296,6 @@ dependencies {
 	docs "io.spring.docresources:spring-doc-resources:${docResourcesVersion}@zip"
 }
 
-task prepareAsciidocBuild(type: Sync) {
-	dependsOn configurations.docs
-	from {
-		configurations.docs.collect { zipTree(it) }
-	}
-	from 'src/reference/asciidoc/'
-	into "$buildDir/asciidoc"
-}
-
-asciidoctorPdf {
-	dependsOn prepareAsciidocBuild
-	baseDirFollowsSourceFile()
-
-	asciidoctorj {
-		sourceDir "$buildDir/asciidoc"
-		inputs.dir(sourceDir)
-		sources {
-			include 'index.adoc'
-		}
-		options doctype: 'book'
-		attributes 'icons': 'font',
-		'sectanchors': '',
-		'sectnums': '',
-		'toc': '',
-		'source-highlighter' : 'coderay',
-		revnumber: project.version,
-		'project-version': project.version
-	}
-}
-
-asciidoctor {
-	dependsOn asciidoctorPdf
-	baseDirFollowsSourceFile()
-	sourceDir = file("$buildDir/asciidoc")
-	sources {
-		include '*.adoc'
-	}
-	resources {
-		from(sourceDir) {
-			include 'images/*', 'css/**', 'js/**'
-		}
-	}
-	options doctype: 'book', eruby: 'erubis'
-
-	attributes 'docinfo': 'shared',
-		stylesdir: "css/",
-		stylesheet: 'spring.css',
-		'linkcss': true,
-		'icons': 'font',
-		'sectanchors': '',
-		'source-highlighter': 'highlight.js',
-		'highlightjsdir': 'js/highlight',
-		'highlightjs-theme': 'github',
-		'idprefix': '',
-		'idseparator': '-',
-		'spring-version': project.version,
-		'allow-uri-read': '',
-		'toc': 'left',
-		'toclevbels': '4',
-		revnumber: project.version,
-		'project-version': project.version
-}
-
-task reference(dependsOn: asciidoctor) {
-	group = 'Documentation'
-	description = 'Generate the reference documentation'
-}
-
-reference.onlyIf { "$System.env.NO_REFERENCE_TASK" != 'true' || project.hasProperty('ignoreEnvToStopReference') }
-
-sonarqube {
-	properties {
-		property 'sonar.jacoco.reportPath', "${buildDir.name}/jacoco.exec"
-		property 'sonar.links.homepage', linkHomepage
-		property 'sonar.links.ci', linkCi
-		property 'sonar.links.issue', linkIssue
-		property 'sonar.links.scm', linkScmUrl
-		property 'sonar.links.scm_dev', linkScmDevConnection
-		property 'sonar.java.coveragePlugin', 'jacoco'
-	}
-}
 
 task api(type: Javadoc) {
 	group = 'Documentation'
@@ -388,31 +316,8 @@ task api(type: Javadoc) {
 	destinationDir = new File(buildDir, 'api')
 }
 
-task docsZip(type: Zip, dependsOn: [reference]) {
-	group = 'Distribution'
-	archiveClassifier = 'docs'
-	description = "Builds -${archiveClassifier} archive containing api and reference "
 
-	from('src/dist') {
-		include 'changelog.txt'
-	}
-
-	from(api) {
-		into 'api'
-	}
-
-	from ('build/docs/asciidoc') {
-		into 'reference/html'
-	}
-
-	from ('build/docs/asciidocPdf') {
-		include 'index.pdf'
-		rename 'index.pdf', 'spring-pulsar-reference.pdf'
-		into 'reference/pdf'
-	}
-}
-
-task distZip(type: Zip, dependsOn: [docsZip]) { //, schemaZip]) {
+task distZip(type: Zip) { //, schemaZip]) {
 	group = 'Distribution'
 	archiveClassifier = 'dist'
 	description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
@@ -427,10 +332,6 @@ task distZip(type: Zip, dependsOn: [docsZip]) { //, schemaZip]) {
 		into "${baseDir}"
 	}
 
-	from(zipTree(docsZip.archivePath)) {
-		into "${baseDir}/docs"
-	}
-
 	subprojects.each { subproject ->
 		into ("${baseDir}/libs") {
 			from subproject.jar
@@ -442,7 +343,6 @@ task distZip(type: Zip, dependsOn: [docsZip]) { //, schemaZip]) {
 
 artifacts {
 	archives distZip
-	archives docsZip
 }
 
 task dist(dependsOn: assemble) {
@@ -455,7 +355,6 @@ apply from: "${rootProject.projectDir}/publish-maven.gradle"
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			artifact docsZip
 			artifact distZip
 		}
 	}

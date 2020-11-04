@@ -4,15 +4,14 @@ import org.apache.pulsar.client.api.ClientBuilder;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.incolo.springpulsar.core.SpringPulsarException;
-import org.incolo.springpulsar.util.PropertyUtils;
 
 import static org.incolo.springpulsar.util.PropertyUtils.*;
 
-public class DefaultClientFactory implements ClientFactory {
+public class DefaultPulsarClientFactory implements PulsarClientFactory {
 
 	PulsarClientProperties properties;
 
-	public DefaultClientFactory(PulsarClientProperties properties) {
+	public DefaultPulsarClientFactory(PulsarClientProperties properties) {
 		this.properties = properties;
 	}
 
